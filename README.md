@@ -24,6 +24,7 @@ When ordering, fill in the provisioning form as follows:
 | **Prerequisites** | ObjectBucketClaim (S3 via Noobaa), OIDC client secret, Keycloak realm import |
 | **PostgreSQL** | Database backend for TPA (RHEL 10 / PostgreSQL 18) |
 | **TPA Server** | Trusted Profile Analyzer server (external Helm chart from `charts.openshift.io`) |
+| **Demo Dataset** | Uploads a demo dataset to the TPA server (optional, can be disabled independently) |
 
 ### Prerequisites
 
@@ -70,6 +71,29 @@ helm repo update openshift
 helm search repo openshift/redhat-trusted-profile-analyzer --versions
 ```
 
+### Demo Dataset
+
+Runs a Kubernetes Job that downloads a dataset ZIP and uploads it to the TPA server's `/api/v3/dataset` endpoint. The Job handles OpenShift route timeouts gracefully — HTTP 504 or dropped connections after a completed upload are treated as success, since the TPA server continues processing in the background.
+
+The dataset is stored in the `datasets/` directory and referenced via a raw GitHub URL. To use a different dataset, add the file to `datasets/` and update the URL:
+
+```yaml
+components:
+  demoDataset:
+    enabled: true    # set to false to skip dataset upload
+    datasetUrl: "https://raw.githubusercontent.com/redhat-tssc-tmm/rhdp-tpa-demo/main/datasets/my-other-dataset.zip"
+```
+
+## Deployment Order
+
+ArgoCD sync waves ensure components deploy in the correct order:
+
+| Wave | Components |
+|------|------------|
+| 0 | Prerequisites, PostgreSQL (deploy in parallel) |
+| 1 | TPA Server (waits for wave 0 to be healthy) |
+| 2 | Demo Dataset upload (waits for TPA server to be ready) |
+
 ## Repository Structure
 
 ```
@@ -85,10 +109,15 @@ rhdp-tpa-demo/
 │   │   ├── files/
 │   │   │   └── realm-tssc-sso.json
 │   │   └── templates/
-│   └── postgresql/             # PostgreSQL database
+│   ├── postgresql/             # PostgreSQL database
+│   │   ├── Chart.yaml
+│   │   ├── values.yaml
+│   │   └── templates/
+│   └── demo-dataset/           # Dataset upload Job
 │       ├── Chart.yaml
 │       ├── values.yaml
 │       └── templates/
+├── datasets/                   # Dataset ZIP files (referenced by URL)
 ├── examples/                   # Reference: field-content template examples
 └── roles/                      # Reference: AgnosticD workload role
 ```
@@ -106,6 +135,7 @@ Component-specific settings are under `components.<name>` in `values.yaml`:
 - `components.prerequisites` — OBC bucket name, OIDC secret, Keycloak namespace
 - `components.postgresql` — credentials, storage, image, tuning, resources
 - `components.tpaServer` — chart version, OIDC settings, ingress, importers
+- `components.demoDataset` — dataset URL, enable/disable
 
 ## Local Testing
 
