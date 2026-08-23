@@ -96,3 +96,124 @@ spec:
     syncOptions:
       - CreateNamespace=true
 {{- end }}
+
+{{- if .Values.components.tpaServer.enabled }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.fieldContentName }}-server
+  namespace: {{ .Values.argocd.namespace }}
+  labels:
+    app.kubernetes.io/part-of: tpa
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: {{ .Values.argocd.project }}
+  source:
+    repoURL: https://charts.openshift.io/
+    chart: redhat-trusted-profile-analyzer
+    targetRevision: {{ .Values.components.tpaServer.chartVersion | quote }}
+    helm:
+      valuesObject:
+        appDomain: -{{ .Values.tpaNamespace }}.{{ .Values.deployer.domain }}
+        ingress:
+          className: {{ .Values.components.tpaServer.ingress.className }}
+          additionalAnnotations:
+            {{- toYaml .Values.components.tpaServer.ingress.additionalAnnotations | nindent 12 }}
+        storage:
+          type: s3
+          region: https://s3-openshift-storage.{{ .Values.deployer.domain }}:443
+          bucket: {{ .Values.components.prerequisites.objectBucketClaim.bucketName }}
+          accessKey:
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.components.prerequisites.objectBucketClaim.name }}
+                key: AWS_ACCESS_KEY_ID
+          secretKey:
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.components.prerequisites.objectBucketClaim.name }}
+                key: AWS_SECRET_ACCESS_KEY
+        database:
+          host:
+            valueFrom:
+              secretKeyRef:
+                name: tpa-postgresql-credentials
+                key: db.host
+          port:
+            valueFrom:
+              secretKeyRef:
+                name: tpa-postgresql-credentials
+                key: db.port
+          name:
+            valueFrom:
+              secretKeyRef:
+                name: tpa-postgresql-credentials
+                key: db.name
+          username:
+            valueFrom:
+              secretKeyRef:
+                name: tpa-postgresql-credentials
+                key: db.user
+          password:
+            valueFrom:
+              secretKeyRef:
+                name: tpa-postgresql-credentials
+                key: db.password
+        createDatabase:
+          name:
+            valueFrom:
+              secretKeyRef:
+                name: tpa-postgresql-credentials
+                key: db.name
+          username:
+            valueFrom:
+              secretKeyRef:
+                name: tpa-postgresql-credentials
+                key: db.admin
+          password:
+            valueFrom:
+              secretKeyRef:
+                name: tpa-postgresql-credentials
+                key: db.adminpassword
+        migrateDatabase:
+          username:
+            valueFrom:
+              secretKeyRef:
+                name: tpa-postgresql-credentials
+                key: db.admin
+          password:
+            valueFrom:
+              secretKeyRef:
+                name: tpa-postgresql-credentials
+                key: db.adminpassword
+        modules:
+          createDatabase:
+            enabled: {{ .Values.components.tpaServer.modules.createDatabase.enabled }}
+          migrateDatabase:
+            enabled: {{ .Values.components.tpaServer.modules.migrateDatabase.enabled }}
+          createImporters:
+            {{- toYaml .Values.components.tpaServer.modules.createImporters | nindent 12 }}
+        oidc:
+          issuerUrl: https://{{ .Values.components.tpaServer.ssoHostnamePrefix }}.{{ .Values.deployer.domain }}/realms/{{ .Values.components.tpaServer.oidc.realmName }}
+          clients:
+            frontend:
+              clientId: {{ .Values.components.tpaServer.oidc.clients.frontend.clientId }}
+            cli:
+              clientId: {{ .Values.components.tpaServer.oidc.clients.cli.clientId }}
+              clientSecret:
+                valueFrom:
+                  secretKeyRef:
+                    name: oidc-cli
+                    key: client-secret
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ .Values.tpaNamespace }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+{{- end }}

@@ -19,9 +19,56 @@ When ordering, fill in the provisioning form as follows:
 
 ## Components
 
-| Component | Status | Description |
-|-----------|--------|-------------|
-| PostgreSQL | Deployed | Database backend for TPA (RHEL 10 / PostgreSQL 18) |
+| Component | Description |
+|-----------|-------------|
+| **Prerequisites** | ObjectBucketClaim (S3 via Noobaa), OIDC client secret, Keycloak realm import |
+| **PostgreSQL** | Database backend for TPA (RHEL 10 / PostgreSQL 18) |
+| **TPA Server** | Trusted Profile Analyzer server (external Helm chart from `charts.openshift.io`) |
+
+### Prerequisites
+
+The prerequisites component deploys:
+- **ObjectBucketClaim** — creates an S3 bucket (`tpa-bucket`) via ODF/Noobaa for TPA document storage
+- **OIDC CLI Secret** — Keycloak client secret for the TPA CLI service account
+- **KeycloakRealmImport** — imports the `tssc-sso` realm into Keycloak (deployed to the configurable `keycloak` namespace) with:
+  - TPA client scopes: `create:document`, `read:document`, `update:document`, `delete:document`
+  - `tpa-cli` client (service account with all document scopes)
+  - `tpa-frontend` client (public client with all document scopes)
+  - `admin` user (password: `r3dh8t1!`, role: `tpa-admin`)
+  - `tpa-admin` role mapped to all document scopes
+
+> **Note:** After the KeycloakRealmImport completes, the `tssc-sso` realm endpoints are immediately available (OIDC discovery, token issuance, etc.), but the realm may not appear in the Keycloak Admin UI until the Keycloak pod is restarted (`oc delete pod keycloak-0 -n keycloak`). This is cosmetic only — the automated TPA deployment is not affected.
+
+### PostgreSQL
+
+Deploys a PostgreSQL 18 instance with:
+- Credentials stored in a Secret (`tpa-postgresql-credentials`)
+- 30Gi persistent storage
+- WAL and memory tuning via ConfigMap
+- ClusterIP service on port 5432
+
+### TPA Server
+
+Deploys the Trusted Profile Analyzer server using the `redhat-trusted-profile-analyzer` Helm chart from `charts.openshift.io`. The following values are dynamically computed from `deployer.domain` (injected by RHDP):
+- `appDomain` — OpenShift route suffix
+- `storage.region` — Noobaa S3 endpoint
+- `oidc.issuerUrl` — Keycloak realm URL
+
+The chart version is controlled by `components.tpaServer.chartVersion` in `values.yaml` (defaults to `*` for latest). To pin a specific version:
+
+```yaml
+components:
+  tpaServer:
+    chartVersion: "3.1.0"
+```
+
+To list available versions:
+
+```bash
+helm repo add openshift https://charts.openshift.io/
+helm repo update openshift
+helm search repo openshift/redhat-trusted-profile-analyzer --versions
+```
 
 ## Repository Structure
 
@@ -32,10 +79,16 @@ rhdp-tpa-demo/
 ├── templates/
 │   └── applications.yaml       # Generates ArgoCD Application CRs
 ├── components/
+│   ├── prerequisites/          # OBC, OIDC secret, Keycloak realm import
+│   │   ├── Chart.yaml
+│   │   ├── values.yaml
+│   │   ├── files/
+│   │   │   └── realm-tssc-sso.json
+│   │   └── templates/
 │   └── postgresql/             # PostgreSQL database
 │       ├── Chart.yaml
 │       ├── values.yaml
-│       └── templates/          # Secret, PVC, ConfigMap, Deployment, Service
+│       └── templates/
 ├── examples/                   # Reference: field-content template examples
 └── roles/                      # Reference: AgnosticD workload role
 ```
@@ -49,7 +102,10 @@ fieldContentName: tpa                        # Prefix for child ArgoCD Applicati
 tpaNamespace: trusted-profile-analyzer       # Target namespace for all TPA components
 ```
 
-Component-specific settings (credentials, storage, tuning, resources) are under `components.<name>` in `values.yaml`.
+Component-specific settings are under `components.<name>` in `values.yaml`:
+- `components.prerequisites` — OBC bucket name, OIDC secret, Keycloak namespace
+- `components.postgresql` — credentials, storage, image, tuning, resources
+- `components.tpaServer` — chart version, OIDC settings, ingress, importers
 
 ## Local Testing
 
