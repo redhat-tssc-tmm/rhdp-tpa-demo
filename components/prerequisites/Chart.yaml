@@ -1,0 +1,6 @@
+apiVersion: v2
+name: tpa-prerequisites
+description: Prerequisites for Trusted Profile Analyzer (OBC, OIDC secret)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

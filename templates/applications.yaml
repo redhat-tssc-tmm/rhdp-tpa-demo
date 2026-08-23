@@ -1,3 +1,40 @@
+{{- if .Values.components.prerequisites.enabled }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.fieldContentName }}-prerequisites
+  namespace: {{ .Values.argocd.namespace }}
+  labels:
+    app.kubernetes.io/part-of: tpa
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: {{ .Values.argocd.project }}
+  source:
+    repoURL: {{ .Values.gitops.repoUrl }}
+    targetRevision: {{ .Values.gitops.revision }}
+    path: {{ .Values.gitops.basePath }}components/prerequisites
+    helm:
+      valuesObject:
+        namespace: {{ .Values.tpaNamespace }}
+        objectBucketClaim:
+          name: {{ .Values.components.prerequisites.objectBucketClaim.name }}
+          bucketName: {{ .Values.components.prerequisites.objectBucketClaim.bucketName }}
+          storageClassName: {{ .Values.components.prerequisites.objectBucketClaim.storageClassName }}
+        oidc:
+          clientSecret: {{ .Values.components.prerequisites.oidc.clientSecret | quote }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ .Values.tpaNamespace }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+{{- end }}
+
 {{- if .Values.components.postgresql.enabled }}
 ---
 apiVersion: argoproj.io/v1alpha1

@@ -1,0 +1,9 @@
+namespace: trusted-profile-analyzer
+
+objectBucketClaim:
+  name: tpa-bucket-claim
+  bucketName: tpa-bucket
+  storageClassName: openshift-storage.noobaa.io
+
+oidc:
+  clientSecret: "SuTQThQk-68Lu-d7U1-R0co-ze2DBZ9EDPxP"
