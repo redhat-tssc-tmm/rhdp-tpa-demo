@@ -1,0 +1,21 @@
+{{- if .Values.operator.enabled }}
+{{- $existingSub := lookup "operators.coreos.com/v1alpha1" "Subscription" .Values.operator.namespace .Values.operator.name }}
+{{- if not $existingSub.metadata }}
+---
+# Install operator via OLM Subscription
+# Skipped automatically if subscription already exists
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: {{ .Values.operator.name }}
+  namespace: {{ .Values.operator.namespace }}
+  labels:
+    demo.redhat.com/application: "operator"
+spec:
+  channel: {{ .Values.operator.channel }}
+  installPlanApproval: {{ .Values.operator.installPlanApproval }}
+  name: {{ .Values.operator.name }}
+  source: {{ .Values.operator.source }}
+  sourceNamespace: {{ .Values.operator.sourceNamespace }}
+{{- end }}
+{{- end }}

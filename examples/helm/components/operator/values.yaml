@@ -1,0 +1,11 @@
+# Operator installation via OLM
+operator:
+  # Set to true to install the operator
+  # Set to false if operator is already installed on cluster
+  enabled: false
+  name: web-terminal
+  namespace: openshift-operators
+  channel: fast
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  installPlanApproval: Automatic

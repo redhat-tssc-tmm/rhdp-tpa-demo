@@ -1,0 +1,14 @@
+# Ansible collections pre-installed in the image
+# Users can install additional collections at runtime via ansible-galaxy
+collections:
+  # Kubernetes/OpenShift
+  - name: kubernetes.core
+    version: ">=3.0.0"
+
+  # General utilities (includes helm module)
+  - name: community.general
+    version: ">=9.0.0"
+
+  # Cryptography (SSH keys, certificates)
+  - name: community.crypto
+    version: ">=2.0.0"

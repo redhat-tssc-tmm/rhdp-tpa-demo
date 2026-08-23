@@ -1,0 +1,12 @@
+# Core Ansible packages
+ansible-core>=2.15,<2.17
+ansible-runner>=2.4
+
+# Kubernetes/OpenShift integration
+kubernetes>=28.0
+openshift>=0.13
+
+# Common utilities
+PyYAML>=6.0
+requests>=2.31
+jmespath>=1.0

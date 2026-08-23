@@ -1,0 +1,37 @@
+# Ansible Runner for OpenShift
+# Pre-built image with common Ansible dependencies for faster job execution
+#
+# Build: podman build -t quay.io/rhpds/ansible-runner-ocp:latest .
+# Push:  podman push quay.io/rhpds/ansible-runner-ocp:latest
+
+FROM registry.redhat.io/ubi9/python-311:latest
+
+LABEL name="ansible-runner-ocp" \
+      description="Ansible runner with OpenShift/Kubernetes dependencies" \
+      maintainer="Red Hat Demo Platform <rhpds@redhat.com>"
+
+USER root
+
+# Install system packages
+RUN dnf install -y git openssh-clients && \
+    dnf clean all
+
+USER 1001
+
+# Set up virtual environment
+ENV VIRTUAL_ENV=/opt/app-root
+ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
+
+# Install Python packages
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+# Install Ansible collections
+COPY requirements.yml /tmp/requirements.yml
+RUN ansible-galaxy collection install -r /tmp/requirements.yml -p /opt/app-root/lib/python3.11/site-packages/ansible_collections
+
+# Set Ansible defaults
+ENV ANSIBLE_COLLECTIONS_PATH=/opt/app-root/lib/python3.11/site-packages
+ENV ANSIBLE_HOST_KEY_CHECKING=False
+
+WORKDIR /runner
