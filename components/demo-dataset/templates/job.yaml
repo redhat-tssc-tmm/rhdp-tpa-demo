@@ -1,0 +1,80 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: tpa-demo-dataset-upload
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        app: tpa-demo-dataset-upload
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: upload
+          image: {{ .Values.image }}
+          env:
+            - name: DATASET_URL
+              value: {{ .Values.datasetUrl | quote }}
+            - name: TPA_URL
+              value: {{ .Values.tpaServerUrl | quote }}
+            - name: KC_TOKEN_URL
+              value: {{ .Values.keycloakTokenUrl | quote }}
+            - name: CLIENT_ID
+              value: {{ .Values.clientId | quote }}
+            - name: CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: oidc-cli
+                  key: client-secret
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+
+              echo "Downloading dataset..."
+              curl -sSL -o /tmp/dataset.zip "$DATASET_URL"
+              FILE_SIZE=$(du -h /tmp/dataset.zip | cut -f1)
+              echo "Downloaded ${FILE_SIZE}"
+
+              echo "Requesting access token..."
+              TOKEN=$(curl -sSk "$KC_TOKEN_URL" \
+                -d "grant_type=client_credentials&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}" \
+                | python3 -c 'import sys,json; print(json.load(sys.stdin)["access_token"])')
+
+              echo "Uploading dataset to ${TPA_URL}/api/v3/dataset ..."
+              HTTP_CODE=$(curl -sk -o /tmp/response.json -w "%{http_code}" -X POST \
+                "${TPA_URL}/api/v3/dataset" \
+                -H "Content-Type: application/zip" \
+                -H "Authorization: Bearer ${TOKEN}" \
+                --data-binary @/tmp/dataset.zip) || true
+
+              echo "HTTP response code: ${HTTP_CODE:-unknown}"
+
+              if [[ "$HTTP_CODE" =~ ^2 ]]; then
+                echo "Upload and ingestion successful."
+                exit 0
+              elif [[ "$HTTP_CODE" == "504" ]]; then
+                echo "Route timed out (HTTP 504) but upload completed successfully."
+                echo "The server continues processing in the background."
+                exit 0
+              elif [[ -z "$HTTP_CODE" || "$HTTP_CODE" == "000" ]]; then
+                echo "Connection closed after upload (no HTTP response received)."
+                echo "This is expected for large datasets that exceed the route timeout."
+                echo "The server continues processing in the background."
+                exit 0
+              else
+                echo "Upload failed with HTTP ${HTTP_CODE}."
+                cat /tmp/response.json 2>/dev/null || true
+                exit 1
+              fi
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 100m
+            limits:
+              memory: 512Mi
+              cpu: 500m

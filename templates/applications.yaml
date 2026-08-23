@@ -5,6 +5,8 @@ kind: Application
 metadata:
   name: {{ .Values.fieldContentName }}-prerequisites
   namespace: {{ .Values.argocd.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
   labels:
     app.kubernetes.io/part-of: tpa
   finalizers:
@@ -47,6 +49,8 @@ kind: Application
 metadata:
   name: {{ .Values.fieldContentName }}-postgresql
   namespace: {{ .Values.argocd.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
   labels:
     app.kubernetes.io/part-of: tpa
   finalizers:
@@ -104,6 +108,8 @@ kind: Application
 metadata:
   name: {{ .Values.fieldContentName }}-server
   namespace: {{ .Values.argocd.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
   labels:
     app.kubernetes.io/part-of: tpa
   finalizers:
@@ -207,6 +213,44 @@ spec:
                   secretKeyRef:
                     name: oidc-cli
                     key: client-secret
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ .Values.tpaNamespace }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+{{- end }}
+
+{{- if .Values.components.demoDataset.enabled }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.fieldContentName }}-demo-dataset
+  namespace: {{ .Values.argocd.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  labels:
+    app.kubernetes.io/part-of: tpa
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: {{ .Values.argocd.project }}
+  source:
+    repoURL: {{ .Values.gitops.repoUrl }}
+    targetRevision: {{ .Values.gitops.revision }}
+    path: {{ .Values.gitops.basePath }}components/demo-dataset
+    helm:
+      valuesObject:
+        namespace: {{ .Values.tpaNamespace }}
+        datasetUrl: {{ .Values.components.demoDataset.datasetUrl | quote }}
+        tpaServerUrl: https://server-{{ .Values.tpaNamespace }}.{{ .Values.deployer.domain }}
+        keycloakTokenUrl: https://{{ .Values.components.tpaServer.ssoHostnamePrefix }}.{{ .Values.deployer.domain }}/realms/{{ .Values.components.tpaServer.oidc.realmName }}/protocol/openid-connect/token
+        clientId: {{ .Values.components.tpaServer.oidc.clients.cli.clientId }}
+        image: {{ .Values.components.demoDataset.image }}
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.tpaNamespace }}

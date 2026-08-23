@@ -116,6 +116,11 @@ components:
               namespace: redhat-user-workloads
               disabled: true
 
+  demoDataset:
+    enabled: true
+    datasetUrl: "https://raw.githubusercontent.com/redhat-tssc-tmm/rhdp-tpa-demo/main/datasets/tpa-demo-dataset-v2.zip"
+    image: registry.redhat.io/ubi9/ubi
+
 deployer:
   domain: ""
   apiUrl: ""

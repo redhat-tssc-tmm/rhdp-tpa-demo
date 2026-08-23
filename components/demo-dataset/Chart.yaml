@@ -1,0 +1,6 @@
+apiVersion: v2
+name: tpa-demo-dataset
+description: Uploads a demo dataset to the TPA server
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

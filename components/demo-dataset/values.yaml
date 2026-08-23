@@ -1,0 +1,8 @@
+namespace: trusted-profile-analyzer
+
+datasetUrl: ""
+tpaServerUrl: ""
+keycloakTokenUrl: ""
+clientId: tpa-cli
+
+image: registry.redhat.io/ubi9/ubi

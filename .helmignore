@@ -1,0 +1,8 @@
+datasets/
+examples/
+roles/
+docs/
+.git/
+*.md
+SESSION-SUMMARY.md
+project-documentation.md
