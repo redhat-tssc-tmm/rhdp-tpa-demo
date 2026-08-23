@@ -24,6 +24,11 @@ spec:
           storageClassName: {{ .Values.components.prerequisites.objectBucketClaim.storageClassName }}
         oidc:
           clientSecret: {{ .Values.components.prerequisites.oidc.clientSecret | quote }}
+        keycloak:
+          namespace: {{ .Values.components.prerequisites.keycloak.namespace }}
+          realmImport:
+            name: {{ .Values.components.prerequisites.keycloak.realmImport.name }}
+            keycloakCRName: {{ .Values.components.prerequisites.keycloak.realmImport.keycloakCRName }}
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.tpaNamespace }}

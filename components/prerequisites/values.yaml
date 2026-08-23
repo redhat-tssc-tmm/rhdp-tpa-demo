@@ -7,3 +7,9 @@ objectBucketClaim:
 
 oidc:
   clientSecret: "SuTQThQk-68Lu-d7U1-R0co-ze2DBZ9EDPxP"
+
+keycloak:
+  namespace: keycloak
+  realmImport:
+    name: tssc-sso-realm-import
+    keycloakCRName: keycloak

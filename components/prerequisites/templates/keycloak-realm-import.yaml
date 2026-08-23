@@ -1,0 +1,10 @@
+---
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: KeycloakRealmImport
+metadata:
+  name: {{ .Values.keycloak.realmImport.name }}
+  namespace: {{ .Values.keycloak.namespace }}
+spec:
+  keycloakCRName: {{ .Values.keycloak.realmImport.keycloakCRName }}
+  realm:
+    {{- .Files.Get "files/realm-tssc-sso.json" | fromJson | toYaml | nindent 4 }}
