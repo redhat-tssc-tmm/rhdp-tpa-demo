@@ -1,0 +1,56 @@
+{{- if .Values.components.postgresql.enabled }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Release.Name }}-postgresql
+  namespace: {{ .Values.argocd.namespace }}
+  labels:
+    app.kubernetes.io/part-of: tpa
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: {{ .Values.argocd.project }}
+  source:
+    repoURL: {{ .Values.gitops.repoUrl }}
+    targetRevision: {{ .Values.gitops.revision }}
+    path: {{ .Values.gitops.basePath }}components/postgresql
+    helm:
+      valuesObject:
+        namespace: {{ .Values.tpaNamespace }}
+        credentials:
+          dbHost: {{ .Values.components.postgresql.credentials.dbHost | quote }}
+          dbName: {{ .Values.components.postgresql.credentials.dbName | quote }}
+          dbUser: {{ .Values.components.postgresql.credentials.dbUser | quote }}
+          dbPassword: {{ .Values.components.postgresql.credentials.dbPassword | quote }}
+          dbAdmin: {{ .Values.components.postgresql.credentials.dbAdmin | quote }}
+          dbAdminPassword: {{ .Values.components.postgresql.credentials.dbAdminPassword | quote }}
+          dbPort: {{ .Values.components.postgresql.credentials.dbPort | quote }}
+        storage:
+          size: {{ .Values.components.postgresql.storage.size }}
+        image: {{ .Values.components.postgresql.image }}
+        tuning:
+          maxWalSize: {{ .Values.components.postgresql.tuning.maxWalSize | quote }}
+          minWalSize: {{ .Values.components.postgresql.tuning.minWalSize | quote }}
+          walBuffers: {{ .Values.components.postgresql.tuning.walBuffers | quote }}
+          maintenanceWorkMem: {{ .Values.components.postgresql.tuning.maintenanceWorkMem | quote }}
+          workMem: {{ .Values.components.postgresql.tuning.workMem | quote }}
+          sharedBuffers: {{ .Values.components.postgresql.tuning.sharedBuffers | quote }}
+          effectiveCacheSize: {{ .Values.components.postgresql.tuning.effectiveCacheSize | quote }}
+        resources:
+          limits:
+            memory: {{ .Values.components.postgresql.resources.limits.memory }}
+            cpu: {{ .Values.components.postgresql.resources.limits.cpu }}
+          requests:
+            memory: {{ .Values.components.postgresql.resources.requests.memory }}
+            cpu: {{ .Values.components.postgresql.resources.requests.cpu }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ .Values.tpaNamespace }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+{{- end }}

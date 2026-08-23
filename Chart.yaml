@@ -1,0 +1,9 @@
+apiVersion: v2
+name: tpa-deployment
+description: App of Apps - Trusted Profile Analyzer deployment via ArgoCD
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+maintainers:
+  - name: Markus Nagel
+    email: mnagel@redhat.com
