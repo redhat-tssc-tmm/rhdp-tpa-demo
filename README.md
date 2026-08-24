@@ -2,14 +2,20 @@
 
 Deploys [Red Hat Trusted Profile Analyzer](https://docs.redhat.com/en/documentation/red_hat_trusted_profile_analyzer) and all required components on OpenShift using an ArgoCD app-of-apps pattern.
 
-## Provisioning via RHDP
+## Quick Start
+
+### Provisioning via RHDP
 
 This repository is designed to be deployed through the [Field Content CI](https://catalog.demo.redhat.com/catalog/all?item=babylon-catalog-prod%2Fpublished.ocp-field-asset.prod) catalog item on Red Hat Demo Platform.
 
 When ordering, fill in the provisioning form as follows:
 
+
+
 | Field | Value |
 |-------|-------|
+| **Cluster Size** | sno (Single Node Openshift is the fastest deployment option and works well) |
+| **OpenShift Version** | 4.22 (I have tested with 4.22, but others should work, too) |
 | **Existing Gitops Repo?** | Checked |
 | **GitOps Repo** | `https://github.com/redhat-tssc-tmm/rhdp-tpa-demo.git` |
 | **GitOps Revision** | `main` |
@@ -17,7 +23,37 @@ When ordering, fill in the provisioning form as follows:
 
 > **Important:** The GitOps Path must be set to `.` (a single dot). Leaving it empty will cause the ArgoCD Application to fail with an `InvalidSpecError` because ArgoCD requires an explicit path value.
 
-## Components
+![Provisioning Form](docs/tpa-demo/images/provisioning-options.png)
+
+## Content
+
+This deployment provisions a complete Trusted Profile Analyzer environment, preloaded with demo data and ready to use:
+
+| Component | URL | Purpose |
+|-----------|-----|---------|
+| **Trusted Profile Analyzer** | `https://server-trusted-profile-analyzer.<domain>` | SBOM management, vulnerability analysis, and advisory tracking. Log in with `admin` / `r3dh8t1!` |
+| **RHDA Backend** | `https://rhda.<domain>` | Dependency Analytics middleware for IDE integration. Configure the [RHDA VS Code plugin](https://marketplace.visualstudio.com/items?itemName=redhat.fabric8-analytics) to use this endpoint |
+| **TPA Database Monitor** | `https://tpa-db-monitor-trusted-profile-analyzer.<domain>` | Real-time PostgreSQL activity dashboard for monitoring dataset ingestion |
+
+### Demo Data
+
+TPA is preloaded with a dataset containing **45 SBOMs**, advisories, and corresponding CVEs, so it can be demoed immediately with meaningful data. The dataset is automatically uploaded during deployment via a Kubernetes Job.
+
+### Dependency Analytics Demo
+
+A test Maven application is included at `apps/rhda-test-app/` with dependencies that have known vulnerabilities (including a critical Apache Parquet CVE). To use it:
+
+1. Open `apps/rhda-test-app/pom.xml` in VS Code
+2. Configure the RHDA plugin backend URL to `https://rhda.<domain>`
+3. The plugin will automatically scan dependencies and show vulnerability results from the TPA instance
+
+For details on the RHDA plugin, vulnerability sources, and how the analysis works, see [rhda.md](rhda.md).
+
+---
+
+## Details
+
+### Components
 
 | Component | Description |
 |-----------|-------------|
@@ -122,7 +158,7 @@ components:
 
 For details on configuring the RHDA VS Code plugin against this backend, see [rhda.md](rhda.md).
 
-## Deployment Order
+### Deployment Order
 
 ArgoCD sync waves ensure components deploy in the correct order:
 
@@ -132,7 +168,7 @@ ArgoCD sync waves ensure components deploy in the correct order:
 | 1 | TPA Server (waits for wave 0 to be healthy) |
 | 2 | Demo Dataset upload, RHDA Backend (wait for TPA server to be ready) |
 
-## Repository Structure
+### Repository Structure
 
 ```
 rhdp-tpa-demo/
@@ -160,17 +196,20 @@ rhdp-tpa-demo/
 │       ├── values.yaml
 │       └── templates/          # PostgreSQL, Redis, OIDC, CA bundle, backend deployment
 ├── apps/
-│   └── db-monitor/             # DB monitor source (excluded from Helm via .helmignore)
-│       ├── app.py              # Flask app — image: quay.io/tssc_demos/tpa-db-monitor
-│       ├── Containerfile
-│       ├── requirements.txt
-│       └── templates/
+│   ├── db-monitor/             # DB monitor source (excluded from Helm via .helmignore)
+│   │   ├── app.py              # Flask app — image: quay.io/tssc_demos/tpa-db-monitor
+│   │   ├── Containerfile
+│   │   ├── requirements.txt
+│   │   └── templates/
+│   └── rhda-test-app/          # Test Maven app with known vulnerable dependencies
+│       ├── pom.xml
+│       └── src/
 ├── datasets/                   # Dataset ZIP files (referenced by URL)
 ├── examples/                   # Reference: field-content template examples
 └── roles/                      # Reference: AgnosticD workload role
 ```
 
-## Configuration
+### Configuration
 
 All settings are in `values.yaml`. Key values:
 
@@ -186,7 +225,7 @@ Component-specific settings are under `components.<name>` in `values.yaml`:
 - `components.demoDataset` — dataset URL, enable/disable
 - `components.rhdaBackend` — namespace, images, OIDC, branding, PostgreSQL, Redis
 
-## Local Testing
+### Local Testing
 
 ```bash
 helm lint .
