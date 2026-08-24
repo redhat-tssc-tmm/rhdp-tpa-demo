@@ -1,0 +1,54 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tpa-userinfo
+  labels:
+    demo.redhat.com/userinfo: ""
+data:
+  demo_title: "Trusted Profile Analyzer"
+  demo_url: "https://server-{{ .Values.tpaNamespace }}.{{ .Values.deployer.domain }}"
+  access_instructions: "Log in with the credentials below to access the TPA dashboard."
+  username: "admin"
+  password: "r3dh8t1!"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tpa-db-monitor-userinfo
+  labels:
+    demo.redhat.com/userinfo: ""
+data:
+  demo_title: "TPA Database Monitor"
+  demo_url: "https://tpa-db-monitor-{{ .Values.tpaNamespace }}.{{ .Values.deployer.domain }}"
+  access_instructions: "Monitor PostgreSQL activity during dataset ingestion. The page auto-refreshes every 10 seconds."
+
+{{- if .Values.components.rhdaBackend.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rhda-userinfo
+  labels:
+    demo.redhat.com/userinfo: ""
+data:
+  demo_title: "Dependency Analytics Endpoint"
+  demo_url: "https://rhda.{{ .Values.deployer.domain }}"
+  access_instructions: "Configure the Red Hat Dependency Analytics VS Code plugin to use this URL as its backend. Open a pom.xml or package.json to trigger a vulnerability scan."
+{{- end }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tpa-deployment-info
+  labels:
+    demo.redhat.com/userinfo: ""
+data:
+  demo_title: "TPA Deployment Details"
+  tpa_namespace: {{ .Values.tpaNamespace | quote }}
+  field_content_name: {{ .Values.fieldContentName | quote }}
+  keycloak_realm: {{ .Values.components.tpaServer.oidc.realmName | quote }}
+  sso_url: "https://{{ .Values.components.tpaServer.ssoHostnamePrefix }}.{{ .Values.deployer.domain }}/admin/{{ .Values.components.tpaServer.oidc.realmName }}/console/"
+  access_instructions: "Keycloak admin console for the TPA realm. Use the cluster's Keycloak admin credentials to log in."
