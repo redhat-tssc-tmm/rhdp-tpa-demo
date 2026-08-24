@@ -52,20 +52,28 @@
 
     h2 { font-size: 1rem; margin-bottom: 10px; color: #ccc; }
     .error { background: #3d0c02; border: 1px solid #c9190b; padding: 16px; border-radius: 6px; }
+    .timestamp-row { display: flex; align-items: center; gap: 8px; }
     .refresh-bar {
-      position: fixed; top: 0; left: 0; height: 3px; background: #73bcf7;
-      animation: shrink {{ refresh_interval }}s linear;
+      display: inline-block; width: 80px; height: 3px; border-radius: 2px;
+      background: #73bcf7; animation: shrink {{ refresh_interval }}s linear;
     }
-    @keyframes shrink { from { width: 100%; } to { width: 0%; } }
+    @keyframes shrink { from { width: 80px; } to { width: 0; } }
   </style>
 </head>
 <body>
-  <div class="refresh-bar"></div>
-
   <div class="header">
     <div>
       <h1>TPA Database Monitor</h1>
-      <span class="timestamp">Last updated: {{ stats.timestamp }} (refreshes every {{ refresh_interval }}s)</span>
+      <div class="timestamp-row">
+        <span class="timestamp">Last updated: <span id="local-time"></span></span>
+        <span class="refresh-bar"></span>
+      </div>
+      <script>
+        var st = "{{ stats.timestamp }}";
+        var d = new Date();
+        document.getElementById("local-time").textContent =
+          d.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit", second: "2-digit"});
+      </script>
     </div>
     <span class="status-badge status-{{ stats.status }}">{{ stats.status }}</span>
   </div>
@@ -112,7 +120,7 @@
     <tbody>
       {% for a in stats.activity %}
       <tr>
-        <td>{{ a.state }}</td>
+        <td>{{ a.state | safe }}</td>
         <td class="num">{{ a.count }}</td>
         <td class="num">{{ a.max_duration }}</td>
       </tr>

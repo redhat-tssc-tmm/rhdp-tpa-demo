@@ -84,6 +84,24 @@ components:
     datasetUrl: "https://raw.githubusercontent.com/redhat-tssc-tmm/rhdp-tpa-demo/main/datasets/my-other-dataset.zip"
 ```
 
+### Database Monitor
+
+The demo-dataset component includes a lightweight database monitor web app that provides real-time visibility into PostgreSQL activity during dataset ingestion. It is accessible via an OpenShift Route at `https://tpa-db-monitor-<namespace>.<domain>`.
+
+The monitor queries the database only when the page is open (no background polling). It auto-refreshes every 10 seconds.
+
+**During ingestion**, the status shows **INGESTING** (red badge). Active queries and long-running transactions are visible, while row counts in the Top Tables section remain at zero because the transaction has not yet committed:
+
+![DB Monitor during ingestion](docs/tpa-demo/images/tpa-db-monitor-ingesting.png)
+
+**After ingestion completes**, the status switches to **IDLE** (green badge). The row counts are now populated, confirming the data has been committed to the database:
+
+![DB Monitor after ingestion](docs/tpa-demo/images/tpa-db-monitor-after-ingestion.png)
+
+**In the TPA UI**, after ingestion finishes, the dashboard shows the ingested SBOM and advisory statistics at the bottom of the screen (Total SBOMs and Total Advisories):
+
+![TPA dashboard after ingestion](docs/tpa-demo/images/tpa-stats.png)
+
 ## Deployment Order
 
 ArgoCD sync waves ensure components deploy in the correct order:
@@ -113,9 +131,15 @@ rhdp-tpa-demo/
 │   │   ├── Chart.yaml
 │   │   ├── values.yaml
 │   │   └── templates/
-│   └── demo-dataset/           # Dataset upload Job
+│   └── demo-dataset/           # Dataset upload Job + DB monitor deployment
 │       ├── Chart.yaml
 │       ├── values.yaml
+│       └── templates/
+├── apps/
+│   └── db-monitor/             # DB monitor source (excluded from Helm via .helmignore)
+│       ├── app.py              # Flask app — image: quay.io/tssc_demos/tpa-db-monitor
+│       ├── Containerfile
+│       ├── requirements.txt
 │       └── templates/
 ├── datasets/                   # Dataset ZIP files (referenced by URL)
 ├── examples/                   # Reference: field-content template examples

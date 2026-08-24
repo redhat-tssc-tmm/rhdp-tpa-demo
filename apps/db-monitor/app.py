@@ -85,7 +85,12 @@ def get_db_stats():
 
         cur.execute(ACTIVITY_QUERY)
         stats["activity"] = [
-            {"state": r[0] or "unknown", "count": r[1], "max_duration": r[2]}
+            {
+                "state": r[0] if r[0] else 'pg_sql background workers (<code>pg_stat_activity.state == NULL</code>)',
+                "is_null_state": r[0] is None,
+                "count": r[1],
+                "max_duration": r[2],
+            }
             for r in cur.fetchall()
         ]
 
