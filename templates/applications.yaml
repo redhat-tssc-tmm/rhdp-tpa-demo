@@ -264,3 +264,64 @@ spec:
     syncOptions:
       - CreateNamespace=true
 {{- end }}
+
+{{- if .Values.components.rhdaBackend.enabled }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.fieldContentName }}-rhda-backend
+  namespace: {{ .Values.argocd.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  labels:
+    app.kubernetes.io/part-of: tpa
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: {{ .Values.argocd.project }}
+  source:
+    repoURL: {{ .Values.gitops.repoUrl }}
+    targetRevision: {{ .Values.gitops.revision }}
+    path: {{ .Values.gitops.basePath }}components/rhda-backend
+    helm:
+      valuesObject:
+        namespace: {{ .Values.components.rhdaBackend.namespace }}
+        image: {{ .Values.components.rhdaBackend.image }}
+        initImage: {{ .Values.components.rhdaBackend.initImage }}
+        resources:
+          limits:
+            memory: {{ .Values.components.rhdaBackend.resources.limits.memory }}
+            cpu: {{ .Values.components.rhdaBackend.resources.limits.cpu | quote }}
+          requests:
+            memory: {{ .Values.components.rhdaBackend.resources.requests.memory }}
+            cpu: {{ .Values.components.rhdaBackend.resources.requests.cpu }}
+        tpaInternalUrl: https://server.{{ .Values.tpaNamespace }}.svc:443
+        tpaExternalUrl: https://server-{{ .Values.tpaNamespace }}.{{ .Values.deployer.domain }}
+        oidc:
+          clientId: {{ .Values.components.tpaServer.oidc.clients.cli.clientId }}
+          clientSecret: {{ .Values.components.prerequisites.oidc.clientSecret | quote }}
+          issuerUrl: https://{{ .Values.components.tpaServer.ssoHostnamePrefix }}.{{ .Values.deployer.domain }}/realms/{{ .Values.components.tpaServer.oidc.realmName }}
+        branding:
+          displayName: {{ .Values.components.rhdaBackend.branding.displayName | quote }}
+          exploreTitle: {{ .Values.components.rhdaBackend.branding.exploreTitle | quote }}
+          exploreDescription: {{ .Values.components.rhdaBackend.branding.exploreDescription | quote }}
+        postgresql:
+          image: {{ .Values.components.rhdaBackend.postgresql.image }}
+          storage: {{ .Values.components.rhdaBackend.postgresql.storage }}
+          database: {{ .Values.components.rhdaBackend.postgresql.database }}
+          username: {{ .Values.components.rhdaBackend.postgresql.username }}
+          password: {{ .Values.components.rhdaBackend.postgresql.password | quote }}
+        redis:
+          image: {{ .Values.components.rhdaBackend.redis.image }}
+          storage: {{ .Values.components.rhdaBackend.redis.storage }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ .Values.components.rhdaBackend.namespace }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+{{- end }}

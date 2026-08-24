@@ -25,6 +25,7 @@ When ordering, fill in the provisioning form as follows:
 | **PostgreSQL** | Database backend for TPA (RHEL 10 / PostgreSQL 18) |
 | **TPA Server** | Trusted Profile Analyzer server (external Helm chart from `charts.openshift.io`) |
 | **Demo Dataset** | Uploads a demo dataset to the TPA server (optional, can be disabled independently) |
+| **RHDA Backend** | Red Hat Dependency Analytics middleware (deployed to separate `rhda-backend` namespace) |
 
 ### Prerequisites
 
@@ -102,6 +103,21 @@ The monitor queries the database only when the page is open (no background polli
 
 ![TPA dashboard after ingestion](docs/tpa-demo/images/tpa-stats.png)
 
+### RHDA Backend
+
+Deploys the [Red Hat Dependency Analytics](https://developers.redhat.com/products/red-hat-dependency-analytics/overview) backend middleware (`trustify-dependency-analytics`) in its own namespace (`rhda-backend`). This service sits between the RHDA IDE plugin and the TPA server, providing vulnerability analysis, license data, and remediation recommendations.
+
+The component includes its own PostgreSQL (for Flyway-managed schema) and Redis (for caching analysis results), both deployed in the `rhda-backend` namespace. It connects to the TPA server cross-namespace via `https://server.trusted-profile-analyzer.svc:443`.
+
+An init container imports the OpenShift service-serving CA into the JVM truststore, which is required for the internal TLS connection to the TPA server.
+
+```yaml
+components:
+  rhdaBackend:
+    enabled: true        # set to false to skip RHDA backend
+    namespace: rhda-backend
+```
+
 ## Deployment Order
 
 ArgoCD sync waves ensure components deploy in the correct order:
@@ -110,7 +126,7 @@ ArgoCD sync waves ensure components deploy in the correct order:
 |------|------------|
 | 0 | Prerequisites, PostgreSQL (deploy in parallel) |
 | 1 | TPA Server (waits for wave 0 to be healthy) |
-| 2 | Demo Dataset upload (waits for TPA server to be ready) |
+| 2 | Demo Dataset upload, RHDA Backend (wait for TPA server to be ready) |
 
 ## Repository Structure
 
@@ -131,10 +147,14 @@ rhdp-tpa-demo/
 │   │   ├── Chart.yaml
 │   │   ├── values.yaml
 │   │   └── templates/
-│   └── demo-dataset/           # Dataset upload Job + DB monitor deployment
+│   ├── demo-dataset/           # Dataset upload Job + DB monitor deployment
+│   │   ├── Chart.yaml
+│   │   ├── values.yaml
+│   │   └── templates/
+│   └── rhda-backend/           # RHDA backend (separate namespace: rhda-backend)
 │       ├── Chart.yaml
 │       ├── values.yaml
-│       └── templates/
+│       └── templates/          # PostgreSQL, Redis, OIDC, CA bundle, backend deployment
 ├── apps/
 │   └── db-monitor/             # DB monitor source (excluded from Helm via .helmignore)
 │       ├── app.py              # Flask app — image: quay.io/tssc_demos/tpa-db-monitor
@@ -160,6 +180,7 @@ Component-specific settings are under `components.<name>` in `values.yaml`:
 - `components.postgresql` — credentials, storage, image, tuning, resources
 - `components.tpaServer` — chart version, OIDC settings, ingress, importers
 - `components.demoDataset` — dataset URL, enable/disable
+- `components.rhdaBackend` — namespace, images, OIDC, branding, PostgreSQL, Redis
 
 ## Local Testing
 

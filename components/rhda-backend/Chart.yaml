@@ -1,0 +1,6 @@
+apiVersion: v2
+name: rhda-backend
+description: RHDA Backend - Red Hat Dependency Analytics middleware for TPA
+type: application
+version: 0.1.0
+appVersion: "2.0.0"
