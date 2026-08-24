@@ -105,7 +105,9 @@ The monitor queries the database only when the page is open (no background polli
 
 ### RHDA Backend
 
-Deploys the [Red Hat Dependency Analytics](https://developers.redhat.com/products/red-hat-dependency-analytics/overview) backend middleware (`trustify-dependency-analytics`) in its own namespace (`rhda-backend`). This service sits between the RHDA IDE plugin and the TPA server, providing vulnerability analysis, license data, and remediation recommendations.
+Deploys the [Red Hat Dependency Analytics](https://developers.redhat.com/products/red-hat-dependency-analytics/overview) backend middleware ([trustify-dependency-analytics](https://github.com/guacsec/trustify-dependency-analytics)) in its own namespace (`rhda-backend`). This service sits between the RHDA IDE plugin and the TPA server, providing vulnerability analysis, license data, and remediation recommendations.
+
+> **Note:** The deployed image (`quay.io/tssc_demos/trustify-dependency-analytics:v3.1.0`) was built from the `main` branch of the upstream repo as of 24-Aug-2026 using the JVM staged Dockerfile (`src/main/docker/Dockerfile.jvm.staged`). This is not an official release tag — `v3.1.0` refers to the TPA server version it was tested against.
 
 The component includes its own PostgreSQL (for Flyway-managed schema) and Redis (for caching analysis results), both deployed in the `rhda-backend` namespace. It connects to the TPA server cross-namespace via `https://server.trusted-profile-analyzer.svc:443`.
 
@@ -117,6 +119,8 @@ components:
     enabled: true        # set to false to skip RHDA backend
     namespace: rhda-backend
 ```
+
+For details on configuring the RHDA VS Code plugin against this backend, see [rhda.md](rhda.md).
 
 ## Deployment Order
 
