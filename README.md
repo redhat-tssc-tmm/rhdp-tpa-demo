@@ -25,6 +25,8 @@ When ordering, fill in the provisioning form as follows:
 
 ![Provisioning Form](docs/tpa-demo/images/provisioning-options.png)
 
+**_...and you're done!! Wait ~30mins and you have a fully configured TPA, including meaningful data to demo with (no need to wait for the importers to finish!)_**
+
 ## Content
 
 This deployment provisions a complete Trusted Profile Analyzer environment, preloaded with demo data and ready to use:
@@ -33,7 +35,7 @@ This deployment provisions a complete Trusted Profile Analyzer environment, prel
 |-----------|-----|---------|
 | **Trusted Profile Analyzer** | `https://server-trusted-profile-analyzer.<domain>` | SBOM management, vulnerability analysis, and advisory tracking. Log in with `admin` / `r3dh8t1!` |
 | **RHDA Backend** | `https://rhda.<domain>` | Dependency Analytics middleware for IDE integration. Configure the [RHDA VS Code plugin](https://marketplace.visualstudio.com/items?itemName=redhat.fabric8-analytics) to use this endpoint |
-| **TPA Database Monitor** | `https://tpa-db-monitor-trusted-profile-analyzer.<domain>` | Real-time PostgreSQL activity dashboard for monitoring dataset ingestion |
+| **TPA Database Monitor** | `https://tpa-db-monitor-trusted-profile-analyzer.<domain>` | Real-time PostgreSQL activity dashboard for monitoring dataset ingestion. The dataset ingestion takes about 15mins after TPA comes up. If you find "0 SBOMs, 0 Advisories" on the TPA Homepage, check if the ingestion is still running |
 
 ### Demo Data
 
