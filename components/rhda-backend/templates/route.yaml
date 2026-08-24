@@ -6,6 +6,9 @@ metadata:
   labels:
     app: rhda-backend
 spec:
+  {{- if .Values.routeHost }}
+  host: {{ .Values.routeHost }}
+  {{- end }}
   to:
     kind: Service
     name: rhda-backend

@@ -315,6 +315,7 @@ spec:
         redis:
           image: {{ .Values.components.rhdaBackend.redis.image }}
           storage: {{ .Values.components.rhdaBackend.redis.storage }}
+        routeHost: rhda.{{ .Values.deployer.domain }}
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.components.rhdaBackend.namespace }}

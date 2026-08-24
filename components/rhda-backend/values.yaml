@@ -34,3 +34,5 @@ postgresql:
 redis:
   image: registry.redhat.io/rhel9/redis-7:latest
   storage: 1Gi
+
+routeHost: ""
