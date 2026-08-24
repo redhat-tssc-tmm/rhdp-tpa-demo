@@ -10,7 +10,7 @@ This repository is designed to be deployed through the [Field Content CI](https:
 
 When ordering, fill in the provisioning form as follows:
 
-
+**IMPORTANT** This branch (`main`) deploys with disabled importers. You can manually enable them on the importers page. Or, if you would like to deploy with importers enabled, switch to the `with-importers-enabled` branch
 
 | Field | Value |
 |-------|-------|
