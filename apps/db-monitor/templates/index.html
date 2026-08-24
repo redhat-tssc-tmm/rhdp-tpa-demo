@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="refresh" content="{{ refresh_interval }}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TPA Database Monitor</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Red Hat Display', 'Segoe UI', system-ui, sans-serif;
+      background: #151515; color: #e0e0e0; padding: 24px;
+    }
+    h1 { font-size: 1.5rem; margin-bottom: 8px; color: #fff; }
+    .header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 12px;
+    }
+    .timestamp { color: #888; font-size: 0.85rem; }
+
+    .status-badge {
+      display: inline-block; padding: 4px 14px; border-radius: 4px;
+      font-weight: 700; font-size: 0.9rem; letter-spacing: 0.5px;
+    }
+    .status-INGESTING { background: #c9190b; color: #fff; }
+    .status-IDLE { background: #3e8635; color: #fff; }
+    .status-ERROR { background: #f0ab00; color: #151515; }
+
+    .metrics {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px; margin-bottom: 24px;
+    }
+    .metric {
+      background: #212427; border: 1px solid #333; border-radius: 6px;
+      padding: 14px; text-align: center;
+    }
+    .metric-value { font-size: 1.6rem; font-weight: 700; color: #73bcf7; }
+    .metric-label { font-size: 0.75rem; color: #888; margin-top: 4px; text-transform: uppercase; }
+
+    table {
+      width: 100%; border-collapse: collapse; margin-bottom: 24px;
+      background: #212427; border-radius: 6px; overflow: hidden;
+    }
+    th {
+      text-align: left; padding: 10px 14px; background: #2a2d31;
+      font-size: 0.75rem; text-transform: uppercase; color: #888;
+      border-bottom: 1px solid #333;
+    }
+    td { padding: 8px 14px; border-bottom: 1px solid #2a2d31; font-size: 0.85rem; }
+    tr:last-child td { border-bottom: none; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+    h2 { font-size: 1rem; margin-bottom: 10px; color: #ccc; }
+    .error { background: #3d0c02; border: 1px solid #c9190b; padding: 16px; border-radius: 6px; }
+    .refresh-bar {
+      position: fixed; top: 0; left: 0; height: 3px; background: #73bcf7;
+      animation: shrink {{ refresh_interval }}s linear;
+    }
+    @keyframes shrink { from { width: 100%; } to { width: 0%; } }
+  </style>
+</head>
+<body>
+  <div class="refresh-bar"></div>
+
+  <div class="header">
+    <div>
+      <h1>TPA Database Monitor</h1>
+      <span class="timestamp">Last updated: {{ stats.timestamp }} (refreshes every {{ refresh_interval }}s)</span>
+    </div>
+    <span class="status-badge status-{{ stats.status }}">{{ stats.status }}</span>
+  </div>
+
+  {% if stats.error %}
+  <div class="error">
+    <h2>Connection Error</h2>
+    <p>{{ stats.error }}</p>
+  </div>
+  {% else %}
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-value">{{ stats.db_size }}</div>
+      <div class="metric-label">Database Size</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">{{ stats.wal_size }}</div>
+      <div class="metric-label">WAL Size</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">{{ stats.active }}</div>
+      <div class="metric-label">Active Queries</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">{{ stats.idle_txn }}</div>
+      <div class="metric-label">Idle in Txn</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">{{ stats.total_conns }}</div>
+      <div class="metric-label">Total Connections</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">{{ stats.txn_display }}</div>
+      <div class="metric-label">Longest Txn</div>
+    </div>
+  </div>
+
+  <h2>Connection Activity</h2>
+  <table>
+    <thead>
+      <tr><th>State</th><th class="num">Count</th><th class="num">Max Duration (s)</th></tr>
+    </thead>
+    <tbody>
+      {% for a in stats.activity %}
+      <tr>
+        <td>{{ a.state }}</td>
+        <td class="num">{{ a.count }}</td>
+        <td class="num">{{ a.max_duration }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Top Tables by Size</h2>
+  <table>
+    <thead>
+      <tr><th>Table</th><th class="num">Size</th><th class="num">Rows (est.)</th></tr>
+    </thead>
+    <tbody>
+      {% for t in stats.tables %}
+      <tr>
+        <td>{{ t.name }}</td>
+        <td class="num">{{ t.size }}</td>
+        <td class="num">{{ "{:,}".format(t.rows) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% endif %}
+</body>
+</html>

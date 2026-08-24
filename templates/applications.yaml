@@ -251,6 +251,9 @@ spec:
         keycloakTokenUrl: https://{{ .Values.components.tpaServer.ssoHostnamePrefix }}.{{ .Values.deployer.domain }}/realms/{{ .Values.components.tpaServer.oidc.realmName }}/protocol/openid-connect/token
         clientId: {{ .Values.components.tpaServer.oidc.clients.cli.clientId }}
         image: {{ .Values.components.demoDataset.image }}
+        dbMonitor:
+          enabled: {{ .Values.components.demoDataset.dbMonitor.enabled }}
+          image: {{ .Values.components.demoDataset.dbMonitor.image }}
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.tpaNamespace }}

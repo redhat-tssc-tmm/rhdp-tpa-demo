@@ -6,3 +6,7 @@ keycloakTokenUrl: ""
 clientId: tpa-cli
 
 image: registry.redhat.io/ubi9/ubi
+
+dbMonitor:
+  enabled: true
+  image: quay.io/tssc_demos/tpa-db-monitor:latest

@@ -1,0 +1,18 @@
+{{- if .Values.dbMonitor.enabled }}
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: tpa-db-monitor
+  labels:
+    app: tpa-db-monitor
+spec:
+  to:
+    kind: Service
+    name: tpa-db-monitor
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+{{- end }}
