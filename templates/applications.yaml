@@ -26,6 +26,7 @@ spec:
           storageClassName: {{ .Values.components.prerequisites.objectBucketClaim.storageClassName }}
         oidc:
           clientSecret: {{ .Values.components.prerequisites.oidc.clientSecret | quote }}
+        tpaRouteHost: tpa.{{ .Values.deployer.domain }}
         keycloak:
           namespace: {{ .Values.components.prerequisites.keycloak.namespace }}
           realmImport:
@@ -247,13 +248,14 @@ spec:
       valuesObject:
         namespace: {{ .Values.tpaNamespace }}
         datasetUrl: {{ .Values.components.demoDataset.datasetUrl | quote }}
-        tpaServerUrl: https://server-{{ .Values.tpaNamespace }}.{{ .Values.deployer.domain }}
+        tpaServerUrl: https://tpa.{{ .Values.deployer.domain }}
         keycloakTokenUrl: https://{{ .Values.components.tpaServer.ssoHostnamePrefix }}.{{ .Values.deployer.domain }}/realms/{{ .Values.components.tpaServer.oidc.realmName }}/protocol/openid-connect/token
         clientId: {{ .Values.components.tpaServer.oidc.clients.cli.clientId }}
         image: {{ .Values.components.demoDataset.image }}
         dbMonitor:
           enabled: {{ .Values.components.demoDataset.dbMonitor.enabled }}
           image: {{ .Values.components.demoDataset.dbMonitor.image }}
+          routeHost: tpa-db-monitor.{{ .Values.deployer.domain }}
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.tpaNamespace }}
@@ -297,7 +299,7 @@ spec:
             memory: {{ .Values.components.rhdaBackend.resources.requests.memory }}
             cpu: {{ .Values.components.rhdaBackend.resources.requests.cpu }}
         tpaInternalUrl: https://server.{{ .Values.tpaNamespace }}.svc:443
-        tpaExternalUrl: https://server-{{ .Values.tpaNamespace }}.{{ .Values.deployer.domain }}
+        tpaExternalUrl: https://tpa.{{ .Values.deployer.domain }}
         oidc:
           clientId: {{ .Values.components.tpaServer.oidc.clients.cli.clientId }}
           clientSecret: {{ .Values.components.prerequisites.oidc.clientSecret | quote }}

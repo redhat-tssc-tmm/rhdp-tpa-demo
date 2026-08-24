@@ -7,7 +7,7 @@ metadata:
     demo.redhat.com/userinfo: ""
 data:
   demo_title: "Trusted Profile Analyzer"
-  demo_url: "https://server-{{ .Values.tpaNamespace }}.{{ .Values.deployer.domain }}"
+  demo_url: "https://tpa.{{ .Values.deployer.domain }}"
   access_instructions: "Log in with admin/r3dh8t1! to access the TPA dashboard."
 
 
@@ -20,7 +20,7 @@ metadata:
     demo.redhat.com/userinfo: ""
 data:
   demo_title: "TPA Database Monitor"
-  demo_url: "https://tpa-db-monitor-{{ .Values.tpaNamespace }}.{{ .Values.deployer.domain }}"
+  demo_url: "https://tpa-db-monitor.{{ .Values.deployer.domain }}"
   access_instructions: "Monitor PostgreSQL activity during dataset ingestion. The page auto-refreshes every 10 seconds."
 
 

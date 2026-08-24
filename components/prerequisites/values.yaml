@@ -8,6 +8,8 @@ objectBucketClaim:
 oidc:
   clientSecret: "SuTQThQk-68Lu-d7U1-R0co-ze2DBZ9EDPxP"
 
+tpaRouteHost: ""
+
 keycloak:
   namespace: keycloak
   realmImport:

@@ -33,9 +33,9 @@ This deployment provisions a complete Trusted Profile Analyzer environment, prel
 
 | Component | URL | Purpose |
 |-----------|-----|---------|
-| **Trusted Profile Analyzer** | `https://server-trusted-profile-analyzer.<domain>` | SBOM management, vulnerability analysis, and advisory tracking. Log in with `admin` / `r3dh8t1!` |
+| **Trusted Profile Analyzer** | `https://tpa.<domain>` | SBOM management, vulnerability analysis, and advisory tracking. Log in with `admin` / `r3dh8t1!` |
 | **RHDA Backend** | `https://rhda.<domain>` | Dependency Analytics middleware for IDE integration. Configure the [RHDA VS Code plugin](https://marketplace.visualstudio.com/items?itemName=redhat.fabric8-analytics) to use this endpoint |
-| **TPA Database Monitor** | `https://tpa-db-monitor-trusted-profile-analyzer.<domain>` | Real-time PostgreSQL activity dashboard for monitoring dataset ingestion. The dataset ingestion takes about 15mins after TPA comes up. If you find "0 SBOMs, 0 Advisories" on the TPA Homepage, check if the ingestion is still running |
+| **TPA Database Monitor** | `https://tpa-db-monitor.<domain>` | Real-time PostgreSQL activity dashboard for monitoring dataset ingestion. The dataset ingestion takes about 15mins after TPA comes up. If you find "0 SBOMs, 0 Advisories" on the TPA Homepage, check if the ingestion is still running |
 
 ### Demo Data
 
@@ -125,7 +125,7 @@ components:
 
 ### Database Monitor
 
-The demo-dataset component includes a lightweight database monitor web app that provides real-time visibility into PostgreSQL activity during dataset ingestion. It is accessible via an OpenShift Route at `https://tpa-db-monitor-<namespace>.<domain>`.
+The demo-dataset component includes a lightweight database monitor web app that provides real-time visibility into PostgreSQL activity during dataset ingestion. It is accessible via an OpenShift Route at `https://tpa-db-monitor.<domain>`.
 
 The monitor queries the database only when the page is open (no background polling). It auto-refreshes every 10 seconds.
 
