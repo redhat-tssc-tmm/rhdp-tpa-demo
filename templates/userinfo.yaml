@@ -47,3 +47,28 @@ data:
   content_1: "You can find the RHDA Plugin in the VS Code Marketplace"
   content_url_1: "https://marketplace.visualstudio.com/items?itemName=redhat.fabric8-analytics"
 {{- end }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-info
+  namespace: {{ .Values.components.userinfoDashboard.namespace }}
+  labels:
+    demo.redhat.com/userinfo: ""
+data:
+  demo_title: "Admin access"
+  access_instructions: "Check below for other cluster links"
+  label_1: "OpenShift GitOps Password"
+  content_1: "The OpenShift Gitops password is here:"
+  content_url_1: "https://console-openshift-console.{{ .Values.deployer.domain }}/k8s/ns/openshift-gitops/secrets/openshift-gitops-cluster"
+  label_2: "OpenShift GitOps"
+  content_2: "Login with \"admin\" and the password here:"
+  content_url_2: "https://openshift-gitops-server-openshift-gitops.{{ .Values.deployer.domain }}"
+  label_3: "Keycloak Admin Console Password"
+  content_3: "Get the Keycloak Admin & Password from here:"
+  content_url_3: "https://console-openshift-console.{{ .Values.deployer.domain }}/k8s/ns/keycloak/secrets/keycloak-initial-admin"
+  label_4: "Keycloak Admin Console"
+  content_4: "Login to the Keycloak Admin Console here - for TPA, we use the \"TSSC-SSO\" realm, OpenShift access and users are in the \"SSO\" realm"
+  content_url_4: "https://sso.{{ .Values.deployer.domain }}/admin/master/console/#/tssc-sso"
+

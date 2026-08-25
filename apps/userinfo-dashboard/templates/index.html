@@ -1,50 +1,81 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Demo Instructions</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #151515; --fg: #e0e0e0; --fg-heading: #fff;
+      --section-bg: #2a2d31; --table-bg: #212427;
+      --border: #333; --row-border: #2a2d31;
+      --label: #888; --instructions: #ccc;
+      --link: #73bcf7;
+      --toggle-bg: #333; --toggle-fg: #e0e0e0;
+    }
+    [data-theme="light"] {
+      --bg: #f5f5f5; --fg: #1a1a1a; --fg-heading: #000;
+      --section-bg: #e0e0e0; --table-bg: #fff;
+      --border: #ccc; --row-border: #eee;
+      --label: #555; --instructions: #333;
+      --link: #0066cc;
+      --toggle-bg: #ddd; --toggle-fg: #333;
+    }
+
     body {
       font-family: 'Red Hat Display', 'Segoe UI', system-ui, sans-serif;
-      background: #151515; color: #e0e0e0; padding: 24px;
+      background: var(--bg); color: var(--fg); padding: 24px;
+      transition: background 0.2s, color 0.2s;
     }
     .header {
       display: flex; align-items: center; gap: 14px;
-      margin-bottom: 28px; border-bottom: 1px solid #333; padding-bottom: 16px;
+      margin-bottom: 28px; border-bottom: 1px solid var(--border); padding-bottom: 16px;
     }
     .header img { width: 40px; height: 40px; }
-    h1 { font-size: 1.5rem; color: #fff; }
+    h1 { font-size: 1.5rem; color: var(--fg-heading); flex: 1; }
+
+    .theme-toggle {
+      background: var(--toggle-bg); color: var(--toggle-fg);
+      border: 1px solid var(--border); border-radius: 4px;
+      padding: 6px 12px; cursor: pointer; font-size: 0.8rem;
+      font-family: inherit; transition: background 0.2s;
+    }
+    .theme-toggle:hover { opacity: 0.8; }
 
     .section { margin-bottom: 24px; }
 
     .section-title {
-      background: #2a2d31; padding: 12px 16px; font-size: 1.1rem; font-weight: 700;
-      color: #fff; border-radius: 6px 6px 0 0; border: 1px solid #333; border-bottom: none;
+      background: var(--section-bg); padding: 12px 16px; font-size: 1.1rem; font-weight: 700;
+      color: var(--fg-heading); border-radius: 6px 6px 0 0;
+      border: 1px solid var(--border); border-bottom: none;
     }
 
     table {
       width: 100%; border-collapse: collapse;
-      background: #212427; border: 1px solid #333; border-radius: 0 0 6px 6px;
-      overflow: hidden; table-layout: fixed;
+      background: var(--table-bg); border: 1px solid var(--border);
+      border-radius: 0 0 6px 6px; overflow: hidden;
     }
-    td { padding: 10px 16px; border-bottom: 1px solid #2a2d31; vertical-align: top; }
+    td {
+      padding: 10px 16px; border-bottom: 1px solid var(--row-border);
+      vertical-align: top;
+    }
     tr:last-child td { border-bottom: none; }
 
-    .col-label { width: 20%; color: #888; font-size: 0.85rem; }
+    .col-label { width: 20%; color: var(--label); font-size: 0.85rem; }
     .col-content { width: 80%; font-size: 0.85rem; }
 
     .full-row td { padding: 10px 16px; }
 
     .demo-url a {
-      color: #73bcf7; text-decoration: none; font-size: 0.95rem; font-weight: 600;
+      color: var(--link); text-decoration: none; font-size: 0.95rem; font-weight: 600;
     }
     .demo-url a:hover { text-decoration: underline; }
 
-    .instructions { color: #ccc; font-size: 0.85rem; line-height: 1.5; }
+    .instructions { color: var(--instructions); font-size: 0.85rem; line-height: 1.5; }
 
-    .content-url a { color: #73bcf7; text-decoration: none; font-size: 0.8rem; }
+    .content-url a { color: var(--link); text-decoration: none; font-size: 0.8rem; }
     .content-url a:hover { text-decoration: underline; }
   </style>
 </head>
@@ -52,6 +83,7 @@
   <div class="header">
     <img src="{{ url_for('static', filename='demo-icon.png') }}" alt="Demo">
     <h1>Demo Instructions</h1>
+    <button class="theme-toggle" onclick="toggleTheme()">Light Mode</button>
   </div>
 
   {% for section in sections %}
@@ -94,5 +126,28 @@
     </table>
   </div>
   {% endif %}
+
+  <script>
+    function toggleTheme() {
+      var html = document.documentElement;
+      var btn = document.querySelector('.theme-toggle');
+      if (html.getAttribute('data-theme') === 'dark') {
+        html.setAttribute('data-theme', 'light');
+        btn.textContent = 'Dark Mode';
+        localStorage.setItem('theme', 'light');
+      } else {
+        html.setAttribute('data-theme', 'dark');
+        btn.textContent = 'Light Mode';
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+    (function() {
+      var saved = localStorage.getItem('theme');
+      if (saved === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        document.querySelector('.theme-toggle').textContent = 'Dark Mode';
+      }
+    })();
+  </script>
 </body>
 </html>
