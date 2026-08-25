@@ -150,6 +150,15 @@ components:
       image: registry.redhat.io/rhel9/redis-7:latest
       storage: 1Gi
 
+  userinfoDashboard:
+    enabled: true
+    namespace: rhdp-userinfo
+    image: quay.io/tssc_demos/rhdp-userinfo:latest
+    consoleLink:
+      section: "Demo Platform"
+      text: "Instructions"
+      iconUrl: ""
+
 deployer:
   domain: ""
   apiUrl: ""

@@ -1,0 +1,10 @@
+namespace: rhdp-userinfo
+
+image: quay.io/tssc_demos/rhdp-userinfo:latest
+
+routeHost: ""
+
+consoleLink:
+  section: "Demo Platform"
+  text: "Instructions"
+  iconUrl: ""

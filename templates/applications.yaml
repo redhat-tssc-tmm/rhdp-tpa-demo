@@ -328,3 +328,43 @@ spec:
     syncOptions:
       - CreateNamespace=true
 {{- end }}
+
+{{- if .Values.components.userinfoDashboard.enabled }}
+{{- $uiRouteHost := printf "demo-instructions.%s" .Values.deployer.domain }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.fieldContentName }}-userinfo-dashboard
+  namespace: {{ .Values.argocd.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  labels:
+    app.kubernetes.io/part-of: tpa
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: {{ .Values.argocd.project }}
+  source:
+    repoURL: {{ .Values.gitops.repoUrl }}
+    targetRevision: {{ .Values.gitops.revision }}
+    path: {{ .Values.gitops.basePath }}components/userinfo-dashboard
+    helm:
+      valuesObject:
+        namespace: {{ .Values.components.userinfoDashboard.namespace }}
+        image: {{ .Values.components.userinfoDashboard.image }}
+        routeHost: {{ $uiRouteHost }}
+        consoleLink:
+          section: {{ .Values.components.userinfoDashboard.consoleLink.section | quote }}
+          text: {{ .Values.components.userinfoDashboard.consoleLink.text | quote }}
+          iconUrl: {{ .Values.components.userinfoDashboard.consoleLink.iconUrl | default (printf "https://%s/static/demo-icon.png" $uiRouteHost) | quote }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ .Values.components.userinfoDashboard.namespace }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+{{- end }}

@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: userinfo-dashboard
+  labels:
+    app: userinfo-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: userinfo-dashboard
+  template:
+    metadata:
+      labels:
+        app: userinfo-dashboard
+    spec:
+      serviceAccountName: userinfo-dashboard
+      containers:
+        - name: userinfo-dashboard
+          image: {{ .Values.image }}
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: 64Mi
+              cpu: 50m
+            limits:
+              memory: 128Mi
+              cpu: 200m

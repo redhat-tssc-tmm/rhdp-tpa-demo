@@ -1,0 +1,19 @@
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: userinfo-dashboard
+  labels:
+    app: userinfo-dashboard
+spec:
+  {{- if .Values.routeHost }}
+  host: {{ .Values.routeHost }}
+  {{- end }}
+  to:
+    kind: Service
+    name: userinfo-dashboard
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

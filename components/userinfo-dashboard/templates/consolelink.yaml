@@ -1,0 +1,12 @@
+---
+apiVersion: console.openshift.io/v1
+kind: ConsoleLink
+metadata:
+  name: {{ .Values.consoleLink.text | lower | replace " " "-" }}-console-link
+spec:
+  location: ApplicationMenu
+  applicationMenu:
+    section: {{ .Values.consoleLink.section | quote }}
+    imageURL: {{ .Values.consoleLink.iconUrl | quote }}
+  href: https://{{ .Values.routeHost }}
+  text: {{ .Values.consoleLink.text | quote }}
