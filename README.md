@@ -10,7 +10,7 @@ This repository is designed to be deployed through the [Field Content CI](https:
 
 When ordering, fill in the provisioning form as follows:
 
-**IMPORTANT** This branch (`main`) deploys with disabled importers. You can manually enable them on the importers page. Or, if you would like to deploy with importers enabled, switch to the `with-importers-enabled` branch
+> **IMPORTANT** This demo deploys with all importers configured but disabled (only the curated dataset gets ingested automatically after provisioning). If you want to demo with more data, just go to the "Importers" page and enable them, then click on "Run" to schedule them immediately. For a full matching of Advisories with CVEs, **enable "Red Hat CSAF", "CVEList v5" and "OSV"**. Depending on your environment, the full import will take up to 24 hours!
 
 | Field | Value |
 |-------|-------|

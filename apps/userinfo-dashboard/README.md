@@ -74,6 +74,12 @@ This renders as:
 └──────────────────────────────────────────────────┘
 ```
 
+Live example:
+
+![Demo Instructions](../../docs/tpa-demo/images/demo-instructions.png)
+
+
+
 ## OpenShift Console Integration
 
 The Helm component deploys a `ConsoleLink` CR that adds an entry to the OpenShift Console application launcher (the grid icon in the top-right corner). The category, link text, and icon are configurable via Helm values:
@@ -86,6 +92,9 @@ components:
       text: "Instructions"           # link text
       iconUrl: ""                    # defaults to the app's own /static/demo-icon.png
 ```
+
+![Instructions Link](../../docs/tpa-demo/images/instructions-link.png)
+
 
 ## Building
 
