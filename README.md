@@ -172,7 +172,7 @@ ArgoCD sync waves ensure components deploy in the correct order:
 
 | Wave | Components |
 |------|------------|
-| 0 | Prerequisites, PostgreSQL (deploy in parallel) |
+| 0 | Prerequisites, PostgreSQL, UserInfo Dashboard (deploy in parallel) |
 | 1 | TPA Server (waits for wave 0 to be healthy) |
 | 2 | Demo Dataset upload, RHDA Backend (wait for TPA server to be ready) |
 
@@ -199,15 +199,22 @@ rhdp-tpa-demo/
 │   │   ├── Chart.yaml
 │   │   ├── values.yaml
 │   │   └── templates/
-│   └── rhda-backend/           # RHDA backend (separate namespace: rhda-backend)
+│   ├── rhda-backend/           # RHDA backend (separate namespace: rhda-backend)
+│   │   ├── Chart.yaml
+│   │   ├── values.yaml
+│   │   └── templates/          # PostgreSQL, Redis, OIDC, CA bundle, backend deployment
+│   └── userinfo-dashboard/     # Instructions dashboard + ConsoleLink (namespace: rhdp-userinfo)
 │       ├── Chart.yaml
 │       ├── values.yaml
-│       └── templates/          # PostgreSQL, Redis, OIDC, CA bundle, backend deployment
-├── apps/
-│   ├── db-monitor/             # DB monitor source (excluded from Helm via .helmignore)
-│   │   ├── app.py              # Flask app — image: quay.io/tssc_demos/tpa-db-monitor
+│       └── templates/          # Deployment, Service, Route, RBAC, ConsoleLink
+├── apps/                       # App source code (excluded from Helm via .helmignore)
+│   ├── db-monitor/             # DB monitor — image: quay.io/tssc_demos/tpa-db-monitor
+│   │   ├── app.py
 │   │   ├── Containerfile
-│   │   ├── requirements.txt
+│   │   └── templates/
+│   ├── userinfo-dashboard/     # Instructions dashboard — image: quay.io/tssc_demos/rhdp-userinfo
+│   │   ├── app.py
+│   │   ├── Containerfile
 │   │   └── templates/
 │   └── rhda-test-app/          # Test Maven app with known vulnerable dependencies
 │       ├── pom.xml
@@ -232,6 +239,7 @@ Component-specific settings are under `components.<name>` in `values.yaml`:
 - `components.tpaServer` — chart version, OIDC settings, ingress, importers
 - `components.demoDataset` — dataset URL, enable/disable
 - `components.rhdaBackend` — namespace, images, OIDC, branding, PostgreSQL, Redis
+- `components.userinfoDashboard` — namespace, image, ConsoleLink section/text/icon
 
 ### Local Testing
 
