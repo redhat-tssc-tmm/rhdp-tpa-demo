@@ -27,6 +27,12 @@ When ordering, fill in the provisioning form as follows:
 
 **_...and you're done!! Wait ~30mins and you have a fully configured TPA, including meaningful data to demo with (no need to wait for the importers to finish!)_**
 
+You'll find the links to the components in the "Demo Platform Instructions" link in the console menu:
+
+| | |
+|---|---|
+| ![Instructions Link](docs/tpa-demo/images/instructions-link.png) | ![Demo Instructions](docs/tpa-demo/images/demo-instructions.png) |
+
 ## Content
 
 This deployment provisions a complete Trusted Profile Analyzer environment, preloaded with demo data and ready to use:
