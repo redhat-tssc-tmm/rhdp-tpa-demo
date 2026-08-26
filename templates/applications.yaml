@@ -123,6 +123,8 @@ spec:
     targetRevision: {{ .Values.components.tpaServer.chartVersion | quote }}
     helm:
       valuesObject:
+        openshift:
+          enabled: true
         appDomain: -{{ .Values.tpaNamespace }}.{{ .Values.deployer.domain }}
         ingress:
           className: {{ .Values.components.tpaServer.ingress.className }}
