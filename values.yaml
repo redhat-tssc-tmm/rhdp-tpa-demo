@@ -59,6 +59,9 @@ components:
     # "*" deploys the latest available version from charts.openshift.io
     # Pin to a specific version (e.g. "3.1.0") for reproducible deployments
     chartVersion: "*"
+    image:
+      fullName: quay.io/ruben/rhtpa-lwn-demo:latest
+      pullPolicy: Always
     ssoHostnamePrefix: sso
     oidc:
       realmName: tssc-sso

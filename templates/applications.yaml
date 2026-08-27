@@ -123,6 +123,10 @@ spec:
     targetRevision: {{ .Values.components.tpaServer.chartVersion | quote }}
     helm:
       valuesObject:
+        {{- if .Values.components.tpaServer.image }}
+        image:
+          {{- toYaml .Values.components.tpaServer.image | nindent 10 }}
+        {{- end }}
         openshift:
           enabled: true
         appDomain: -{{ .Values.tpaNamespace }}.{{ .Values.deployer.domain }}
