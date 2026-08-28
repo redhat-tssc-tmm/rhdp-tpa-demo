@@ -55,7 +55,7 @@ Six RHLW advisories target Spring Framework **5.3.18** (spring-core, spring-expr
 ```
 apps/help-im-vulnerable/
 ├── pom.xml                                          # Spring Boot 2.6.6 parent, pinned deps
-├── Dockerfile                                       # Multi-stage: Maven build + UBI runtime
+├── Containerfile                                    # Multi-stage: Maven build + UBI runtime
 ├── src/main/java/com/redhat/tpa/vulnerable/
 │   ├── HelpImVulnerableApplication.java             # @SpringBootApplication
 │   ├── HelloController.java                         # Exercises all vulnerable deps
@@ -100,8 +100,11 @@ Results are collected into a list of status entries that feed both the HTML tabl
 ## Verification
 
 1. `cd apps/help-im-vulnerable && mvn clean package` — confirms compilation
-2. `podman build -t help-im-vulnerable .` — builds container
-3. Generate SBOM: `syft help-im-vulnerable -o cyclonedx-json > sbom.json`
+2. `podman build -f Containerfile -t help-im-vulnerable .` — builds container
+3. Generate SBOM: 
+   - if running locally (no container registry), export a tar first
+   - `podman save help-im-vulnerable -o /tmp/help-im-vulnerable.tar`
+   - `syft /tmp/help-im-vulnerable.tar -o cyclonedx-json@1.6 --source-name "Help-Im-Vulnerable" --source-version "1.0.0" > sbom.json`
 4. Upload to TPA and verify:
    - All 11 RHLW advisories match with Lightwell remediation versions
    - Additional CVE advisories match the remaining deps
