@@ -27,28 +27,47 @@ Six RHLW advisories target Spring Framework **5.3.18** (spring-core, spring-expr
 
 ## Dependency Plan
 
-| Dependency | Pinned Version | RHLW CVEs | Other CVEs |
-|---|---|---|---|
-| Spring Boot (parent) | **2.6.7** | | CVE-2025-22235, CVE-2026-40973 |
-| spring-webmvc (transitive 5.3.18) | via Boot 2.6.6 | CVE-2023-20860, CVE-2024-38816 | |
-| spring-expression (transitive 5.3.18) | via Boot 2.6.6 | CVE-2023-20861, CVE-2023-20863, CVE-2024-38808 | |
-| spring-core (transitive 5.3.18) | via Boot 2.6.6 | CVE-2025-41249 | |
-| spring-security (via starter) | 5.6.2 (Boot 2.6.6 default) | | CVE-2024-22257, CVE-2024-38821, CVE-2026-22732, CVE-2026-22746 |
-| woodstox-core | **6.0.3** | CVE-2022-40152 | |
-| org.json:json | **20220320** | CVE-2022-45688, CVE-2023-5072 | |
-| json-path | **2.8.0** | CVE-2023-51074 | |
-| snakeyaml | 1.29 (Boot 2.6.6 default) | | CVE-2022-1471 |
-| logback-classic | 1.2.11 (Boot 2.6.6 default) | | CVE-2023-6378 |
-| jackson-databind | 2.13.2 (Boot 2.6.6 default) | | CVE-2022-42003 |
-| commons-fileupload | 1.4 | | CVE-2023-24998 |
-| commons-io | 2.11.0 | | CVE-2024-47554 |
-| httpclient | 4.5.12 | | CVE-2020-13956 |
-| json-smart | 2.4.8 | | CVE-2023-1370, CVE-2024-57699 |
-| junit (test) | 4.13 | | CVE-2020-15250 |
-| h2 | 2.1.214 | | CVE-2022-45868 |
-| plexus-utils | 3.5.0 | | CVE-2025-67030 |
+The app includes dependencies that match **two types** of advisories in the demo dataset:
 
-**Coverage: all 27 CVEs, including all 11 RHLW advisories with Lightwell remediation.**
+### Matched by TPA and RHDA (OSV format with purls)
+
+The RHLW advisories use OSV format with explicit `package.purl` fields, so TPA can
+directly match them against SBOM packages and show Lightwell remediation.
+
+| Dependency | Pinned Version | RHLW CVEs |
+|---|---|---|
+| spring-webmvc (transitive 5.3.18) | via Boot 2.6.6 | CVE-2023-20860, CVE-2024-38816 |
+| spring-expression (transitive 5.3.18) | via Boot 2.6.6 | CVE-2023-20861, CVE-2023-20863, CVE-2024-38808 |
+| spring-core (transitive 5.3.18) | via Boot 2.6.6 | CVE-2025-41249 |
+| woodstox-core | **6.0.3** | CVE-2022-40152 |
+| org.json:json | **20220320** | CVE-2022-45688, CVE-2023-5072 |
+| json-path | **2.8.0** | CVE-2023-51074 |
+
+### Not matched by TPA (CVE 5.0 format, no purls)
+
+The remaining CVEs exist in the dataset as CVE_RECORD advisories, but these use
+vendor/product text fields (e.g. `SnakeYAML/SnakeYAML`) instead of purls. TPA cannot
+match them against SBOM packages because there is no purl-based link between the
+advisory and the SBOM dependency. These dependencies are still included in the app
+for completeness — they would be matched if corresponding OSV/RHLW advisories with
+purls were added to the dataset.
+
+> NOTE: There is a dataset available that includes the lightwell dataset plus the missing advisories for upstream fixes. If you need the full picture, use `lw-gh-osv.zip`
+
+| Dependency | Pinned Version | CVEs (present but not matched) |
+|---|---|---|
+| Spring Boot (parent) | **2.6.6** | CVE-2025-22235, CVE-2026-40973 |
+| spring-security (via starter) | 5.6.2 | CVE-2024-22257, CVE-2024-38821, CVE-2026-22732, CVE-2026-22746 |
+| snakeyaml | 1.29 | CVE-2022-1471 |
+| logback-classic | 1.2.11 | CVE-2023-6378 |
+| jackson-databind | 2.13.2 | CVE-2022-42003 |
+| commons-fileupload | 1.4 | CVE-2023-24998 |
+| commons-io | 2.11.0 | CVE-2024-47554 |
+| httpclient | 4.5.12 | CVE-2020-13956 |
+| json-smart | 2.4.8 | CVE-2023-1370, CVE-2024-57699 |
+| junit (test) | 4.13 | CVE-2020-15250 |
+| h2 | 2.1.214 | CVE-2022-45868 |
+| plexus-utils | 3.5.0 | CVE-2025-67030 |
 
 ## App Structure
 
@@ -101,10 +120,13 @@ Results are collected into a list of status entries that feed both the HTML tabl
 
 1. `cd apps/help-im-vulnerable && mvn clean package` — confirms compilation
 2. `podman build -f Containerfile -t help-im-vulnerable .` — builds container
-3. Generate SBOM: 
+3. Generate SBOM (syft-only): 
    - if running locally (no container registry), export a tar first
    - `podman save help-im-vulnerable -o /tmp/help-im-vulnerable.tar`
    - `syft /tmp/help-im-vulnerable.tar -o cyclonedx-json@1.6 --source-name "Help-Im-Vulnerable" --source-version "1.0.0" > sbom.json`
-4. Upload to TPA and verify:
-   - All 11 RHLW advisories match with Lightwell remediation versions
-   - Additional CVE advisories match the remaining deps
+4. Generate SBOM (workaround for syft gap / upstream pom.properties missing)
+   - run the `generate-sbom.sh` which generates the app SBOM via the maven plugin, then generates the container SBOM via syft, then merges them.
+5. Upload to TPA and verify:
+   - The 10 RHLW advisories (OSV format with purls) match and show Lightwell remediation versions
+   - The remaining CVEs are in the dataset but won't match because their advisories (CVE 5.0 format) lack purl-based package identifiers
+   - With the extended dataset, OSVs for the remaining CVEs have been added, including upstream OSVs that match the Lightwell OSV, showing Lightwell as well as Upstream remediations.
