@@ -61,7 +61,7 @@ components:
     # Pin to a specific version (e.g. "3.1.0") for reproducible deployments
     chartVersion: "*"
     image:
-      fullName: quay.io/ruben/rhtpa-lwn-demo@sha256:db15bd71227053854d0a215d41a4b69276db68ad96a90b6d0bd2f8e8814e5262
+      fullName: quay.io/ruben/rhtpa-lwn-demo@sha256:latest
       pullPolicy: Always
     ssoHostnamePrefix: sso
     oidc:
