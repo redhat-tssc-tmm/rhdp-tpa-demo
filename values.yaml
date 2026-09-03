@@ -3,8 +3,8 @@ tpaNamespace: trusted-profile-analyzer
 
 gitops:
   repoUrl: "https://github.com/redhat-tssc-tmm/rhdp-tpa-demo.git"
-  revision: "main"
-  basePath: ""
+  revision: "feat/tpa-pre-release"
+  basePath: "."
 
 argocd:
   namespace: openshift-gitops
@@ -60,7 +60,7 @@ components:
     # Pin to a specific version (e.g. "3.1.0") for reproducible deployments
     chartVersion: "*"
     image:
-      fullName: quay.io/ruben/rhtpa-lwn-demo:latest
+      fullName: quay.io/ruben/rhtpa-lwn-demo@sha256:db15bd71227053854d0a215d41a4b69276db68ad96a90b6d0bd2f8e8814e5262
       pullPolicy: Always
     ssoHostnamePrefix: sso
     oidc:
@@ -130,7 +130,7 @@ components:
   rhdaBackend:
     enabled: true
     namespace: rhda-backend
-    image: quay.io/tssc_demos/trustify-dependency-analytics:v3.1.0
+    image: quay.io/ruben/rhda-lwn-demo@sha256:28269d02d5bd70296cc7160b62a58c139b1eb0ecba62b7068b97584b85f12ce9
     initImage: registry.redhat.io/ubi9/openjdk-21-runtime:1.23
     resources:
       limits:
