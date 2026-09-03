@@ -4,7 +4,7 @@ tpaNamespace: trusted-profile-analyzer
 gitops:
   repoUrl: "https://github.com/redhat-tssc-tmm/rhdp-tpa-demo.git"
   revision: "feat/tpa-pre-release"
-  basePath: "."
+  basePath: ""
 
 argocd:
   namespace: openshift-gitops
