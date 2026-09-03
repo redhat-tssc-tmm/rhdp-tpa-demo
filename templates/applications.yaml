@@ -84,6 +84,7 @@ spec:
           workMem: {{ .Values.components.postgresql.tuning.workMem | quote }}
           sharedBuffers: {{ .Values.components.postgresql.tuning.sharedBuffers | quote }}
           effectiveCacheSize: {{ .Values.components.postgresql.tuning.effectiveCacheSize | quote }}
+          maxConnections: {{ .Values.components.postgresql.tuning.maxConnections | default 200 }}
         resources:
           limits:
             memory: {{ .Values.components.postgresql.resources.limits.memory }}

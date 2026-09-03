@@ -46,6 +46,7 @@ components:
       workMem: "2MB"
       sharedBuffers: "512MB"
       effectiveCacheSize: "2GB"
+      maxConnections: 200
     resources:
       limits:
         memory: 6Gi
