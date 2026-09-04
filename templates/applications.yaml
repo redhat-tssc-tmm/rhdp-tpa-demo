@@ -259,10 +259,42 @@ spec:
         keycloakTokenUrl: https://{{ .Values.components.tpaServer.ssoHostnamePrefix }}.{{ .Values.deployer.domain }}/realms/{{ .Values.components.tpaServer.oidc.realmName }}/protocol/openid-connect/token
         clientId: {{ .Values.components.tpaServer.oidc.clients.cli.clientId }}
         image: {{ .Values.components.demoDataset.image }}
-        dbMonitor:
-          enabled: {{ .Values.components.demoDataset.dbMonitor.enabled }}
-          image: {{ .Values.components.demoDataset.dbMonitor.image }}
-          routeHost: tpa-db-monitor.{{ .Values.deployer.domain }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ .Values.tpaNamespace }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+{{- end }}
+
+{{- if .Values.components.dbMonitor.enabled }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.fieldContentName }}-db-monitor
+  namespace: {{ .Values.argocd.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  labels:
+    app.kubernetes.io/part-of: tpa
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: {{ .Values.argocd.project }}
+  source:
+    repoURL: {{ .Values.gitops.repoUrl }}
+    targetRevision: {{ .Values.gitops.revision }}
+    path: {{ .Values.gitops.basePath }}components/db-monitor
+    helm:
+      valuesObject:
+        namespace: {{ .Values.tpaNamespace }}
+        image: {{ .Values.components.dbMonitor.image }}
+        routeHost: tpa-db-monitor.{{ .Values.deployer.domain }}
+        userinfoNamespace: {{ .Values.components.userinfoDashboard.namespace }}
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.tpaNamespace }}

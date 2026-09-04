@@ -1,0 +1,15 @@
+{{- if .Values.userinfoNamespace }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tpa-db-monitor-userinfo
+  namespace: {{ .Values.userinfoNamespace }}
+  labels:
+    demo.redhat.com/userinfo: ""
+data:
+  order: "2"
+  demo_title: "TPA Database Monitor"
+  demo_url: "https://{{ .Values.routeHost }}"
+  access_instructions: "Monitor PostgreSQL activity during dataset ingestion. The page auto-refreshes every 10 seconds."
+{{- end }}

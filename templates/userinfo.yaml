@@ -15,20 +15,6 @@ data:
   label_2: "Password"
   content_2: "r3dh8t1!"
 
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: tpa-db-monitor-userinfo
-  namespace: {{ .Values.components.userinfoDashboard.namespace }}
-  labels:
-    demo.redhat.com/userinfo: ""
-data:
-  order: "2"
-  demo_title: "TPA Database Monitor"
-  demo_url: "https://tpa-db-monitor.{{ .Values.deployer.domain }}"
-  access_instructions: "Monitor PostgreSQL activity during dataset ingestion. The page auto-refreshes every 10 seconds."
-
 {{- if .Values.components.rhdaBackend.enabled }}
 ---
 apiVersion: v1

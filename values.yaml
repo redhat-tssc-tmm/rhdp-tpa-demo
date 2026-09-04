@@ -124,9 +124,10 @@ components:
     enabled: false
     datasetUrl: "https://raw.githubusercontent.com/redhat-tssc-tmm/rhdp-tpa-demo/main/datasets/tpa-demo-dataset-v2.zip"
     image: registry.redhat.io/ubi9/ubi
-    dbMonitor:
-      enabled: true
-      image: quay.io/tssc_demos/tpa-db-monitor:latest
+
+  dbMonitor:
+    enabled: true
+    image: quay.io/tssc_demos/tpa-db-monitor:latest
 
   rhdaBackend:
     enabled: true
