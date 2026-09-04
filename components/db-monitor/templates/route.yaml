@@ -1,4 +1,3 @@
-{{- if .Values.dbMonitor.enabled }}
 ---
 apiVersion: route.openshift.io/v1
 kind: Route
@@ -7,8 +6,8 @@ metadata:
   labels:
     app: tpa-db-monitor
 spec:
-  {{- if .Values.dbMonitor.routeHost }}
-  host: {{ .Values.dbMonitor.routeHost }}
+  {{- if .Values.routeHost }}
+  host: {{ .Values.routeHost }}
   {{- end }}
   to:
     kind: Service
@@ -18,4 +17,3 @@ spec:
   tls:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect
-{{- end }}
