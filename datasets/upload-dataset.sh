@@ -35,7 +35,7 @@ KC_TOKEN_URL="https://${KC_HOST}/realms/${OIDC_REALM}/protocol/openid-connect/to
 echo "Token endpoint: $KC_TOKEN_URL"
 
 echo "Retrieving OIDC client secret..."
-CLIENT_SECRET=$(oc get secret "$OIDC_SECRET_NAME" -n "$TPA_NAMESPACE" -o jsonpath='{.data.client-secret}' | base64 -d)
+CLIENT_SECRET=$(oc get secret "$OIDC_SECRET_NAME" -n "$TPA_NAMESPACE" -o jsonpath='{.data.client-secret}' | base64 --decode)
 
 # --- 3) Get authentication token ---
 echo "Requesting access token..."
