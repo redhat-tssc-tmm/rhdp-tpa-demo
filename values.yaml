@@ -60,8 +60,11 @@ components:
     # "*" deploys the latest available version from charts.openshift.io
     # Pin to a specific version (e.g. "3.1.0") for reproducible deployments
     chartVersion: "*"
+    # "image" overrides the chart image
     image:
-      fullName: quay.io/ruben/rhtpa-lwn-demo:latest
+      # fullName: quay.io/ruben/rhtpa-lwn-demo:latest
+      # the sha below is the "latest" as of 3rd Sept, 7:42pm
+      fullName: quay.io/ruben/rhtpa-lwn-demo@sha256:29d3fe729d452cf09beb8f5704a5690eb3390e0da46a5b1147eb3d755e0e0d6a
       pullPolicy: Always
     ssoHostnamePrefix: sso
     oidc:
@@ -132,6 +135,7 @@ components:
   rhdaBackend:
     enabled: true
     namespace: rhda-backend
+    # "latest" image tag as of 1st Sept, 5:51pm 
     image: quay.io/ruben/rhda-lwn-demo@sha256:28269d02d5bd70296cc7160b62a58c139b1eb0ecba62b7068b97584b85f12ce9
     initImage: registry.redhat.io/ubi9/openjdk-21-runtime:1.23
     resources:
