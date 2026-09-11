@@ -1,0 +1,15 @@
+{{- if and .Values.showroom.enabled .Values.userinfoNamespace }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: showroom-userinfo
+  namespace: {{ .Values.userinfoNamespace }}
+  labels:
+    demo.redhat.com/userinfo: ""
+data:
+  order: "0"
+  demo_title: "Lab Instructions"
+  demo_url: "https://{{ .Values.showroom.name }}-{{ .Values.showroom.namespace }}.{{ .Values.deployer.domain }}"
+  access_instructions: "Follow the step-by-step lab guide for the TPA demo."
+{{- end }}
