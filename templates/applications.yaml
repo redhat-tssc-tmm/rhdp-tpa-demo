@@ -413,6 +413,9 @@ spec:
                 memory: {{ .Values.components.showroom.terminal.resources.limits.memory | quote }}
         deployer:
           domain: {{ .Values.deployer.domain | quote }}
+        demo:
+          namespace: {{ .Values.tpaNamespace }}
+          appName: tpa
         userinfoNamespace: {{ .Values.components.userinfoDashboard.namespace }}
   destination:
     server: https://kubernetes.default.svc

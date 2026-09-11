@@ -27,4 +27,8 @@ showroom:
 deployer:
   domain: ""
 
+demo:
+  namespace: ""
+  appName: ""
+
 userinfoNamespace: ""

@@ -88,8 +88,8 @@ metadata:
 data:
   user_data.yml: |
     cluster_domain: {{ .Values.deployer.domain }}
-    demo_namespace: {{ .Values.demo.namespace }}
-    demo_app: {{ .Values.demo.appName }}
+    demo_namespace: {{ .Values.demo.namespace | default .Values.showroom.namespace }}
+    demo_app: {{ .Values.demo.appName | default "tpa" }}
 ---
 # Showroom PVC
 apiVersion: v1
