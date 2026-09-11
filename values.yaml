@@ -164,7 +164,7 @@ components:
     namespace: showroom
     name: showroom
     content:
-      repoUrl: "https://github.com/rhpds/showroom_template_nookbag.git"
+      repoUrl: "https://github.com/redhat-tssc-tmm/rhdp-tpa-demo-showroom.git"
       repoRef: "main"
       antoraPlaybook: "site.yml"
       image: "quay.io/rhpds/showroom-content:v1.3.1"
