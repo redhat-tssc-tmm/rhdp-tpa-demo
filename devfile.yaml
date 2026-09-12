@@ -19,17 +19,14 @@ commands:
       commandLine: |
         CLUSTER_DOMAIN=$(echo "$CLUSTER_CONSOLE_URL" | sed 's|https://console-openshift-console\.||')
         RHDA_URL="https://rhda.${CLUSTER_DOMAIN}"
-        SETTINGS_FILE="${PROJECT_SOURCE}/.vscode/settings.json"
-        mkdir -p "$(dirname "$SETTINGS_FILE")"
-        if [ -f "$SETTINGS_FILE" ]; then
+        MACHINE_SETTINGS="/checode/remote/data/Machine/settings.json"
+        if [ -f "$MACHINE_SETTINGS" ]; then
           python3 -c "
         import json
-        with open('${SETTINGS_FILE}') as f:
+        with open('${MACHINE_SETTINGS}') as f:
             d = json.load(f)
         d['redHatDependencyAnalytics.backendUrl'] = '${RHDA_URL}'
-        with open('${SETTINGS_FILE}', 'w') as f:
+        with open('${MACHINE_SETTINGS}', 'w') as f:
             json.dump(d, f, indent=4)
         "
-        else
-          echo '{\"redHatDependencyAnalytics.backendUrl\": \"'${RHDA_URL}'\"}' > "$SETTINGS_FILE"
         fi
