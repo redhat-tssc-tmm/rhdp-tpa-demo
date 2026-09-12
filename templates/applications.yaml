@@ -421,14 +421,9 @@ spec:
   ignoreDifferences:
     - group: org.eclipse.che
       kind: CheCluster
-      jsonPointers:
-        - /spec/components
-        - /spec/devEnvironments/defaultComponents
-        - /spec/devEnvironments/defaultEditor
-        - /spec/devEnvironments/containerRunConfiguration
-        - /spec/devEnvironments/disableContainerBuildCapabilities
-        - /spec/networking
-        - /spec/containerRegistry
+      jqPathExpressions:
+        - .spec
+        - .metadata.annotations
   project: {{ .Values.argocd.project }}
   source:
     repoURL: {{ .Values.gitops.repoUrl }}
