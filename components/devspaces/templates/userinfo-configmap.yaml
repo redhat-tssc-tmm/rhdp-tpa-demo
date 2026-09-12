@@ -1,0 +1,15 @@
+{{- if .Values.userinfoNamespace }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: devspaces-userinfo
+  namespace: {{ .Values.userinfoNamespace }}
+  labels:
+    demo.redhat.com/userinfo: ""
+data:
+  order: "4"
+  demo_title: "DevSpaces (VS Code + RHDA)"
+  demo_url: "https://devspaces.{{ .Values.deployer.domain }}#{{ .Values.factoryRepoUrl }}"
+  access_instructions: "Click to open the TPA demo repo in VS Code with the Red Hat Dependency Analytics plugin. Open any pom.xml to trigger a vulnerability scan."
+{{- end }}

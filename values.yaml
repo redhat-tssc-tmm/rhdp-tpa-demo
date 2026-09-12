@@ -159,6 +159,10 @@ components:
       image: registry.redhat.io/rhel9/redis-7:latest
       storage: 1Gi
 
+  devspaces:
+    enabled: true
+    factoryRepoUrl: "https://github.com/redhat-tssc-tmm/rhdp-tpa-demo.git"
+
   showroom:
     enabled: true
     namespace: showroom

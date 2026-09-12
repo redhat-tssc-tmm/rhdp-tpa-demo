@@ -1,0 +1,6 @@
+apiVersion: v2
+name: tpa-devspaces
+description: OpenShift DevSpaces with VS Code and RHDA plugin for TPA demo
+type: application
+version: 0.1.0
+appVersion: "3.19"

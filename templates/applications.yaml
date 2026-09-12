@@ -368,6 +368,43 @@ spec:
       - CreateNamespace=true
 {{- end }}
 
+{{- if .Values.components.devspaces.enabled }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.fieldContentName }}-devspaces
+  namespace: {{ .Values.argocd.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  labels:
+    app.kubernetes.io/part-of: tpa
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: {{ .Values.argocd.project }}
+  source:
+    repoURL: {{ .Values.gitops.repoUrl }}
+    targetRevision: {{ .Values.gitops.revision }}
+    path: {{ .Values.gitops.basePath }}components/devspaces
+    helm:
+      valuesObject:
+        namespace: openshift-devspaces
+        deployer:
+          domain: {{ .Values.deployer.domain | quote }}
+        userinfoNamespace: {{ .Values.components.userinfoDashboard.namespace }}
+        factoryRepoUrl: {{ .Values.components.devspaces.factoryRepoUrl | quote }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openshift-devspaces
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+{{- end }}
+
 {{- if .Values.components.showroom.enabled }}
 ---
 apiVersion: argoproj.io/v1alpha1

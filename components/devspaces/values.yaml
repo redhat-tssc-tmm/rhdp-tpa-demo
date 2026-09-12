@@ -1,0 +1,7 @@
+namespace: openshift-devspaces
+
+deployer:
+  domain: ""
+
+userinfoNamespace: ""
+factoryRepoUrl: "https://github.com/redhat-tssc-tmm/rhdp-tpa-demo.git"
