@@ -11,5 +11,8 @@ data:
   order: "4"
   demo_title: "DevSpaces (VS Code + RHDA)"
   demo_url: "https://devspaces.{{ .Values.deployer.domain }}#{{ .Values.factoryRepoUrl }}"
-  access_instructions: "Click to open the TPA demo repo in VS Code with the Red Hat Dependency Analytics plugin. Open any pom.xml to trigger a vulnerability scan."
+  access_instructions: "Click the link above to open the TPA demo repo in VS Code with the RHDA plugin. Open any pom.xml to trigger a vulnerability scan."
+  label_1: "DevSpaces Dashboard"
+  content_1: "Manage your workspaces here:"
+  content_url_1: "https://devspaces.{{ .Values.deployer.domain }}"
 {{- end }}
