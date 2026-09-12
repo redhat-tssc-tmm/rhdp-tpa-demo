@@ -19,14 +19,27 @@ commands:
       commandLine: |
         CLUSTER_DOMAIN=$(echo "$CLUSTER_CONSOLE_URL" | sed 's|https://console-openshift-console\.||')
         RHDA_URL="https://rhda.${CLUSTER_DOMAIN}"
-        WORKSPACE_FILE="/projects/.code-workspace"
-        if [ -f "$WORKSPACE_FILE" ]; then
-          python3 -c "
-        import json
-        with open('${WORKSPACE_FILE}') as f:
-            d = json.load(f)
-        d.setdefault('settings', {})['redHatDependencyAnalytics.backendUrl'] = '${RHDA_URL}'
-        with open('${WORKSPACE_FILE}', 'w') as f:
-            json.dump(d, f, indent=4)
-        "
-        fi
+        echo ""
+        echo "============================================================"
+        echo "  RHDA Plugin Configuration Required"
+        echo "============================================================"
+        echo ""
+        echo "  Set the backend URL in VS Code:"
+        echo ""
+        echo "  1. Press Ctrl+Shift+P"
+        echo "  2. Type: Open User Settings (JSON)"
+        echo "  3. Add this line:"
+        echo ""
+        echo "     \"redHatDependencyAnalytics.backendUrl\": \"${RHDA_URL}\""
+        echo ""
+        echo "  Or alternatively:"
+        echo ""
+        echo "  1. Press Ctrl+Shift+P"
+        echo "  2. Type: Open Settings (UI)"
+        echo "  3. Search for: redHatDependencyAnalytics.backendUrl"
+        echo "  4. Change the Backend Url value to:"
+        echo "     ${RHDA_URL}"
+        echo ""
+        echo "  Then open any pom.xml to trigger a scan."
+        echo "============================================================"
+        echo ""
