@@ -162,6 +162,7 @@ components:
   devspaces:
     enabled: true
     factoryRepoUrl: "https://github.com/redhat-tssc-tmm/rhdp-tpa-demo.git"
+    factoryRepoBranch: "feat/tpa-pre-release"
 
   showroom:
     enabled: true

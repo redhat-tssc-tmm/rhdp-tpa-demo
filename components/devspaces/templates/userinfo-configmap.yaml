@@ -10,7 +10,11 @@ metadata:
 data:
   order: "4"
   demo_title: "DevSpaces (VS Code + RHDA)"
+  {{- if .Values.factoryRepoBranch }}
+  demo_url: "https://devspaces.{{ .Values.deployer.domain }}#{{ .Values.factoryRepoUrl | trimSuffix ".git" }}/tree/{{ .Values.factoryRepoBranch }}"
+  {{- else }}
   demo_url: "https://devspaces.{{ .Values.deployer.domain }}#{{ .Values.factoryRepoUrl }}"
+  {{- end }}
   access_instructions: "Click the link above to open the TPA demo repo in VS Code with the RHDA plugin. Open any pom.xml to trigger a vulnerability scan."
   label_1: "DevSpaces Dashboard"
   content_1: "Manage your workspaces here:"

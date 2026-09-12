@@ -395,6 +395,7 @@ spec:
           domain: {{ .Values.deployer.domain | quote }}
         userinfoNamespace: {{ .Values.components.userinfoDashboard.namespace }}
         factoryRepoUrl: {{ .Values.components.devspaces.factoryRepoUrl | quote }}
+        factoryRepoBranch: {{ .Values.components.devspaces.factoryRepoBranch | default "" | quote }}
   destination:
     server: https://kubernetes.default.svc
     namespace: openshift-devspaces
@@ -430,6 +431,7 @@ spec:
           domain: {{ .Values.deployer.domain | quote }}
         userinfoNamespace: ""
         factoryRepoUrl: {{ .Values.components.devspaces.factoryRepoUrl | quote }}
+        factoryRepoBranch: {{ .Values.components.devspaces.factoryRepoBranch | default "" | quote }}
   destination:
     server: https://kubernetes.default.svc
     namespace: openshift-devspaces
