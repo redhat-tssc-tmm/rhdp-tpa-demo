@@ -1,11 +1,10 @@
+{{- if .Values.createInstance }}
 ---
 apiVersion: org.eclipse.che/v2
 kind: CheCluster
 metadata:
   name: devspaces
   namespace: {{ .Values.namespace }}
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
 spec:
   devEnvironments:
     defaultEditor: che-incubator/che-code/latest
@@ -16,3 +15,4 @@ spec:
       debug: false
     pluginRegistry:
       openVSXURL: "https://open-vsx.org"
+{{- end }}

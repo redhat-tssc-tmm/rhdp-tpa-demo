@@ -1,4 +1,5 @@
 namespace: openshift-devspaces
+createInstance: false
 
 deployer:
   domain: ""

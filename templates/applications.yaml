@@ -373,7 +373,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: {{ .Values.fieldContentName }}-devspaces
+  name: {{ .Values.fieldContentName }}-devspaces-operator
   namespace: {{ .Values.argocd.namespace }}
   annotations:
     argocd.argoproj.io/sync-wave: "0"
@@ -390,6 +390,7 @@ spec:
     helm:
       valuesObject:
         namespace: openshift-devspaces
+        createInstance: false
         deployer:
           domain: {{ .Values.deployer.domain | quote }}
         userinfoNamespace: {{ .Values.components.userinfoDashboard.namespace }}
@@ -401,6 +402,47 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.fieldContentName }}-devspaces-instance
+  namespace: {{ .Values.argocd.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  labels:
+    app.kubernetes.io/part-of: tpa
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: {{ .Values.argocd.project }}
+  source:
+    repoURL: {{ .Values.gitops.repoUrl }}
+    targetRevision: {{ .Values.gitops.revision }}
+    path: {{ .Values.gitops.basePath }}components/devspaces
+    helm:
+      valuesObject:
+        namespace: openshift-devspaces
+        createInstance: true
+        deployer:
+          domain: {{ .Values.deployer.domain | quote }}
+        userinfoNamespace: ""
+        factoryRepoUrl: {{ .Values.components.devspaces.factoryRepoUrl | quote }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openshift-devspaces
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 10
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 10m
     syncOptions:
       - CreateNamespace=true
 {{- end }}
