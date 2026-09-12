@@ -17,19 +17,19 @@ commands:
     exec:
       component: dev-tools
       commandLine: |
-        if [ -n "$RHDA_BACKEND_URL" ]; then
-          SETTINGS_FILE="${PROJECT_SOURCE}/.vscode/settings.json"
-          mkdir -p "$(dirname "$SETTINGS_FILE")"
-          if [ -f "$SETTINGS_FILE" ]; then
-            python3 -c "
+        CLUSTER_DOMAIN=$(echo "$CLUSTER_CONSOLE_URL" | sed 's|https://console-openshift-console\.||')
+        RHDA_URL="https://rhda.${CLUSTER_DOMAIN}"
+        SETTINGS_FILE="${PROJECT_SOURCE}/.vscode/settings.json"
+        mkdir -p "$(dirname "$SETTINGS_FILE")"
+        if [ -f "$SETTINGS_FILE" ]; then
+          python3 -c "
         import json
         with open('${SETTINGS_FILE}') as f:
             d = json.load(f)
-        d['redHatDependencyAnalytics.backendUrl'] = '${RHDA_BACKEND_URL}'
+        d['redHatDependencyAnalytics.backendUrl'] = '${RHDA_URL}'
         with open('${SETTINGS_FILE}', 'w') as f:
             json.dump(d, f, indent=4)
         "
-          else
-            echo '{\"redHatDependencyAnalytics.backendUrl\": \"'${RHDA_BACKEND_URL}'\"}' > "$SETTINGS_FILE"
-          fi
+        else
+          echo '{\"redHatDependencyAnalytics.backendUrl\": \"'${RHDA_URL}'\"}' > "$SETTINGS_FILE"
         fi
