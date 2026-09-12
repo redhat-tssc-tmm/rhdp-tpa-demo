@@ -10,6 +10,9 @@ spec:
     defaultEditor: che-incubator/che-code/latest
     defaultNamespace:
       autoProvision: true
+    env:
+      - name: RHDA_BACKEND_URL
+        value: "https://rhda.{{ .Values.deployer.domain }}"
   components:
     cheServer:
       debug: false
