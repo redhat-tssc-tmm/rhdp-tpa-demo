@@ -30,6 +30,6 @@ commands:
             json.dump(d, f, indent=4)
         "
           else
-            echo '{"redHatDependencyAnalytics.backendUrl": "'${RHDA_BACKEND_URL}'"}' > "$SETTINGS_FILE"
+            echo '{\"redHatDependencyAnalytics.backendUrl\": \"'${RHDA_BACKEND_URL}'\"}' > "$SETTINGS_FILE"
           fi
         fi
