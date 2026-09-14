@@ -1,0 +1,68 @@
+{{- if .Values.recommendPatterns }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tpa-server-patcher
+  namespace: {{ .Values.namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: tpa-server-patcher
+  namespace: {{ .Values.namespace }}
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: tpa-server-patcher
+  namespace: {{ .Values.namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: tpa-server-patcher
+subjects:
+  - kind: ServiceAccount
+    name: tpa-server-patcher
+    namespace: {{ .Values.namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: tpa-server-env-patch
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      serviceAccountName: tpa-server-patcher
+      restartPolicy: Never
+      containers:
+        - name: patch
+          image: registry.redhat.io/openshift4/ose-cli:latest
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+              echo "Patching server deployment with TRUSTD_RECOMMEND_PATTERNS..."
+              oc patch deployment server -n {{ .Values.namespace }} --type=json -p '[
+                {
+                  "op": "add",
+                  "path": "/spec/template/spec/containers/0/env/-",
+                  "value": {
+                    "name": "TRUSTD_RECOMMEND_PATTERNS",
+                    "value": "{{ .Values.recommendPatterns }}"
+                  }
+                }
+              ]' 2>&1 || echo "Patch may already exist, checking..."
+              oc get deployment server -n {{ .Values.namespace }} -o jsonpath='{.spec.template.spec.containers[0].env}' | grep -q TRUSTD_RECOMMEND_PATTERNS && echo "Env var confirmed." || exit 1
+{{- end }}

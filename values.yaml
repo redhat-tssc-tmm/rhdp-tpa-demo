@@ -66,6 +66,7 @@ components:
       # the sha below is the "latest" as of 3rd Sept, 7:42pm
       fullName: quay.io/ruben/rhtpa-lwn-demo@sha256:29d3fe729d452cf09beb8f5704a5690eb3390e0da46a5b1147eb3d755e0e0d6a
       pullPolicy: Always
+    recommendPatterns: "rhlw-[0-9]+$"
     ssoHostnamePrefix: sso
     oidc:
       realmName: tssc-sso

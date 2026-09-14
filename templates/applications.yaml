@@ -118,109 +118,118 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: {{ .Values.argocd.project }}
-  source:
-    repoURL: https://charts.openshift.io/
-    chart: redhat-trusted-profile-analyzer
-    targetRevision: {{ .Values.components.tpaServer.chartVersion | quote }}
-    helm:
-      valuesObject:
-        {{- if .Values.components.tpaServer.image }}
-        image:
-          {{- toYaml .Values.components.tpaServer.image | nindent 10 }}
-        {{- end }}
-        openshift:
-          enabled: true
-        appDomain: -{{ .Values.tpaNamespace }}.{{ .Values.deployer.domain }}
-        ingress:
-          className: {{ .Values.components.tpaServer.ingress.className }}
-          additionalAnnotations:
-            {{- toYaml .Values.components.tpaServer.ingress.additionalAnnotations | nindent 12 }}
-        storage:
-          type: s3
-          region: https://s3-openshift-storage.{{ .Values.deployer.domain }}:443
-          bucket: {{ .Values.components.prerequisites.objectBucketClaim.bucketName }}
-          accessKey:
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.components.prerequisites.objectBucketClaim.name }}
-                key: AWS_ACCESS_KEY_ID
-          secretKey:
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.components.prerequisites.objectBucketClaim.name }}
-                key: AWS_SECRET_ACCESS_KEY
-        database:
-          host:
-            valueFrom:
-              secretKeyRef:
-                name: tpa-postgresql-credentials
-                key: db.host
-          port:
-            valueFrom:
-              secretKeyRef:
-                name: tpa-postgresql-credentials
-                key: db.port
-          name:
-            valueFrom:
-              secretKeyRef:
-                name: tpa-postgresql-credentials
-                key: db.name
-          username:
-            valueFrom:
-              secretKeyRef:
-                name: tpa-postgresql-credentials
-                key: db.user
-          password:
-            valueFrom:
-              secretKeyRef:
-                name: tpa-postgresql-credentials
-                key: db.password
-        createDatabase:
-          name:
-            valueFrom:
-              secretKeyRef:
-                name: tpa-postgresql-credentials
-                key: db.name
-          username:
-            valueFrom:
-              secretKeyRef:
-                name: tpa-postgresql-credentials
-                key: db.admin
-          password:
-            valueFrom:
-              secretKeyRef:
-                name: tpa-postgresql-credentials
-                key: db.adminpassword
-        migrateDatabase:
-          username:
-            valueFrom:
-              secretKeyRef:
-                name: tpa-postgresql-credentials
-                key: db.admin
-          password:
-            valueFrom:
-              secretKeyRef:
-                name: tpa-postgresql-credentials
-                key: db.adminpassword
-        modules:
+  sources:
+    - repoURL: https://charts.openshift.io/
+      chart: redhat-trusted-profile-analyzer
+      targetRevision: {{ .Values.components.tpaServer.chartVersion | quote }}
+      helm:
+        valuesObject:
+          {{- if .Values.components.tpaServer.image }}
+          image:
+            {{- toYaml .Values.components.tpaServer.image | nindent 12 }}
+          {{- end }}
+          openshift:
+            enabled: true
+          appDomain: -{{ .Values.tpaNamespace }}.{{ .Values.deployer.domain }}
+          ingress:
+            className: {{ .Values.components.tpaServer.ingress.className }}
+            additionalAnnotations:
+              {{- toYaml .Values.components.tpaServer.ingress.additionalAnnotations | nindent 14 }}
+          storage:
+            type: s3
+            region: https://s3-openshift-storage.{{ .Values.deployer.domain }}:443
+            bucket: {{ .Values.components.prerequisites.objectBucketClaim.bucketName }}
+            accessKey:
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.components.prerequisites.objectBucketClaim.name }}
+                  key: AWS_ACCESS_KEY_ID
+            secretKey:
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.components.prerequisites.objectBucketClaim.name }}
+                  key: AWS_SECRET_ACCESS_KEY
+          database:
+            host:
+              valueFrom:
+                secretKeyRef:
+                  name: tpa-postgresql-credentials
+                  key: db.host
+            port:
+              valueFrom:
+                secretKeyRef:
+                  name: tpa-postgresql-credentials
+                  key: db.port
+            name:
+              valueFrom:
+                secretKeyRef:
+                  name: tpa-postgresql-credentials
+                  key: db.name
+            username:
+              valueFrom:
+                secretKeyRef:
+                  name: tpa-postgresql-credentials
+                  key: db.user
+            password:
+              valueFrom:
+                secretKeyRef:
+                  name: tpa-postgresql-credentials
+                  key: db.password
           createDatabase:
-            enabled: {{ .Values.components.tpaServer.modules.createDatabase.enabled }}
+            name:
+              valueFrom:
+                secretKeyRef:
+                  name: tpa-postgresql-credentials
+                  key: db.name
+            username:
+              valueFrom:
+                secretKeyRef:
+                  name: tpa-postgresql-credentials
+                  key: db.admin
+            password:
+              valueFrom:
+                secretKeyRef:
+                  name: tpa-postgresql-credentials
+                  key: db.adminpassword
           migrateDatabase:
-            enabled: {{ .Values.components.tpaServer.modules.migrateDatabase.enabled }}
-          createImporters:
-            {{- toYaml .Values.components.tpaServer.modules.createImporters | nindent 12 }}
-        oidc:
-          issuerUrl: https://{{ .Values.components.tpaServer.ssoHostnamePrefix }}.{{ .Values.deployer.domain }}/realms/{{ .Values.components.tpaServer.oidc.realmName }}
-          clients:
-            frontend:
-              clientId: {{ .Values.components.tpaServer.oidc.clients.frontend.clientId }}
-            cli:
-              clientId: {{ .Values.components.tpaServer.oidc.clients.cli.clientId }}
-              clientSecret:
-                valueFrom:
-                  secretKeyRef:
-                    name: oidc-cli
-                    key: client-secret
+            username:
+              valueFrom:
+                secretKeyRef:
+                  name: tpa-postgresql-credentials
+                  key: db.admin
+            password:
+              valueFrom:
+                secretKeyRef:
+                  name: tpa-postgresql-credentials
+                  key: db.adminpassword
+          modules:
+            createDatabase:
+              enabled: {{ .Values.components.tpaServer.modules.createDatabase.enabled }}
+            migrateDatabase:
+              enabled: {{ .Values.components.tpaServer.modules.migrateDatabase.enabled }}
+            createImporters:
+              {{- toYaml .Values.components.tpaServer.modules.createImporters | nindent 14 }}
+          oidc:
+            issuerUrl: https://{{ .Values.components.tpaServer.ssoHostnamePrefix }}.{{ .Values.deployer.domain }}/realms/{{ .Values.components.tpaServer.oidc.realmName }}
+            clients:
+              frontend:
+                clientId: {{ .Values.components.tpaServer.oidc.clients.frontend.clientId }}
+              cli:
+                clientId: {{ .Values.components.tpaServer.oidc.clients.cli.clientId }}
+                clientSecret:
+                  valueFrom:
+                    secretKeyRef:
+                      name: oidc-cli
+                      key: client-secret
+    {{- if .Values.components.tpaServer.recommendPatterns }}
+    - repoURL: {{ .Values.gitops.repoUrl }}
+      targetRevision: {{ .Values.gitops.revision }}
+      path: {{ .Values.gitops.basePath }}components/tpa-server-patch
+      helm:
+        valuesObject:
+          namespace: {{ .Values.tpaNamespace }}
+          recommendPatterns: {{ .Values.components.tpaServer.recommendPatterns | quote }}
+    {{- end }}
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.tpaNamespace }}
