@@ -64,10 +64,13 @@ components:
     image:
       # fullName: quay.io/ruben/rhtpa-lwn-demo:latest
       # the sha below is the "latest" as of 3rd Sept, 7:42pm
-      #fullName: quay.io/ruben/rhtpa-lwn-demo@sha256:29d3fe729d452cf09beb8f5704a5690eb3390e0da46a5b1147eb3d755e0e0d6a
-      fullName: quay.io/redhat-user-workloads/trusted-content-tenant/rhtpa-product-0-6-z@sha256:31f4ae60a3fa8fcf77240b62296af102c7e268058b1df5a58832c001dbdf3b8f
+      fullName: quay.io/ruben/rhtpa-lwn-demo@sha256:29d3fe729d452cf09beb8f5704a5690eb3390e0da46a5b1147eb3d755e0e0d6a
+      #QE Image
+      #fullName: quay.io/redhat-user-workloads/trusted-content-tenant/rhtpa-product-0-6-z@sha256:31f4ae60a3fa8fcf77240b62296af102c7e268058b1df5a58832c001dbdf3b8f
       pullPolicy: Always
-    recommendPatterns: "^(.+)-rhlw-[0-9]+$"
+    recommendPatterns: "rhlw-[0-9]+$"  
+    # QE Image patterns, won't start without the capture group ^(.+)
+    #recommendPatterns: "^(.+)-rhlw-[0-9]+$"
     ssoHostnamePrefix: sso
     oidc:
       realmName: tssc-sso
