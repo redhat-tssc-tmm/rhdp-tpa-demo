@@ -47,7 +47,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: patch
-          image: registry.redhat.io/openshift4/ose-cli:latest
+          image: registry.redhat.io/openshift4/ose-cli:v4.15
           command:
             - /bin/bash
             - -c
