@@ -70,7 +70,7 @@ components:
       pullPolicy: Always
     #recommendPatterns: "rhlw-[0-9]+$"  
     # QE Image patterns, won't start without the capture group ^(.+)
-    recommendPatterns: "^(.+)-rhlw-[0-9]+$"
+    recommendPatterns: "^(.+)\\.rhlw-[0-9]+$"
     ssoHostnamePrefix: sso
     oidc:
       realmName: tssc-sso
