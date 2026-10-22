@@ -110,6 +110,13 @@ components:
               source: https://github.com/github/advisory-database
               path: advisories
               disabled: true
+          lightwell-osv:
+            osv:
+              description: Project Lightwell OSV advisories
+              period: 1d
+              source: https://github.com/project-lightwell/lightwell-osv
+              path: advisories
+              disabled: false
           quay-redhat-user-workloads:
             quay:
               description: SBOMs from build image attachments
