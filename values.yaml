@@ -57,20 +57,7 @@ components:
 
   tpaServer:
     enabled: true
-    # "*" deploys the latest available version from charts.openshift.io
-    # Pin to a specific version (e.g. "3.1.0") for reproducible deployments
-    chartVersion: "*"
-    # "image" overrides the chart image
-    image:
-      # fullName: quay.io/ruben/rhtpa-lwn-demo:latest
-      # the sha below is the "latest" as of 3rd Sept, 7:42pm
-      #fullName: quay.io/ruben/rhtpa-lwn-demo@sha256:29d3fe729d452cf09beb8f5704a5690eb3390e0da46a5b1147eb3d755e0e0d6a
-      #QE Image
-      fullName: quay.io/redhat-user-workloads/trusted-content-tenant/rhtpa-product-0-6-z@sha256:0f696e6f7ceadc6f4a2891eb4d65d375f241275da52127e0dcb302806b2a0292
-      pullPolicy: Always
-    #recommendPatterns: "rhlw-[0-9]+$"  
-    # QE Image patterns, won't start without the capture group ^(.+)
-    recommendPatterns: "^(.+)\\.rhlw-[0-9]+$"
+    chartVersion: "3.1.1"
     ssoHostnamePrefix: sso
     oidc:
       realmName: tssc-sso
@@ -84,6 +71,9 @@ components:
       additionalAnnotations:
         haproxy.router.openshift.io/timeout: "5m"
     modules:
+      server:
+        recommendPatterns:
+          - "^(.+)\\.rhlw-[0-9]+$"
       createDatabase:
         enabled: true
       migrateDatabase:
