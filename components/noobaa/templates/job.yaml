@@ -45,6 +45,9 @@ rules:
   - apiGroups: ["coordination.k8s.io"]
     resources: ["leases"]
     verbs: ["*"]
+  - apiGroups: ["postgresql.cnpg.noobaa.io"]
+    resources: ["*"]
+    verbs: ["*"]
   - apiGroups: ["admissionregistration.k8s.io"]
     resources: ["validatingwebhookconfigurations", "mutatingwebhookconfigurations"]
     verbs: ["*"]
@@ -128,7 +131,13 @@ spec:
               fi
 
               echo "StorageClass $STORAGE_CLASS not found. Installing standalone NooBaa..."
-              noobaa-operator install --mini --namespace "$NAMESPACE"
+              noobaa-operator install --mini --manual-default-backingstore --namespace "$NAMESPACE"
+
+              echo "Creating PVPool default backing store..."
+              noobaa-operator backingstore create pv-pool noobaa-default-backing-store \
+                --num-volumes 1 \
+                --pv-size-gb 50 \
+                --namespace "$NAMESPACE"
 
               echo "Waiting for StorageClass $STORAGE_CLASS to become available..."
               TIMEOUT=600
