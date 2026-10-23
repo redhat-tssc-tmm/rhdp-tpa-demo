@@ -50,6 +50,38 @@ rules:
     verbs: ["*"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: system:openshift:scc:nonroot-v2:noobaa
+rules:
+  - apiGroups: ["security.openshift.io"]
+    resources: ["securitycontextconstraints"]
+    resourceNames: ["nonroot-v2"]
+    verbs: ["use"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: noobaa-scc-nonroot-v2
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:openshift:scc:nonroot-v2:noobaa
+subjects:
+  - kind: ServiceAccount
+    name: cnpg-manager
+    namespace: {{ .Values.namespace }}
+  - kind: ServiceAccount
+    name: noobaa
+    namespace: {{ .Values.namespace }}
+  - kind: ServiceAccount
+    name: noobaa-endpoint
+    namespace: {{ .Values.namespace }}
+  - kind: ServiceAccount
+    name: noobaa-core
+    namespace: {{ .Values.namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: noobaa-installer
@@ -96,30 +128,7 @@ spec:
               fi
 
               echo "StorageClass $STORAGE_CLASS not found. Installing standalone NooBaa..."
-
-              # Run install without waiting — noobaa install blocks on system ready
-              # but CNPG needs SCC grants before it can start on OpenShift
-              noobaa-operator install --mini --namespace "$NAMESPACE" &
-              INSTALL_PID=$!
-
-              # Wait for the CNPG service accounts to be created, then grant SCC
-              echo "Waiting for CNPG and NooBaa service accounts..."
-              for i in $(seq 1 60); do
-                if kubectl get sa cnpg-manager -n "$NAMESPACE" >/dev/null 2>&1; then
-                  echo "Granting SCC to service accounts..."
-                  kubectl adm policy add-scc-to-user nonroot-v2 -z cnpg-manager -n "$NAMESPACE" || true
-                  kubectl adm policy add-scc-to-user nonroot-v2 -z noobaa -n "$NAMESPACE" || true
-                  kubectl adm policy add-scc-to-user nonroot-v2 -z noobaa-endpoint -n "$NAMESPACE" || true
-                  kubectl adm policy add-scc-to-user nonroot-v2 -z noobaa-core -n "$NAMESPACE" || true
-                  # Restart CNPG to pick up the SCC
-                  kubectl rollout restart deployment/cnpg-controller-manager -n "$NAMESPACE" || true
-                  break
-                fi
-                sleep 5
-              done
-
-              # Wait for install to finish
-              wait $INSTALL_PID || true
+              noobaa-operator install --mini --namespace "$NAMESPACE"
 
               echo "Waiting for StorageClass $STORAGE_CLASS to become available..."
               TIMEOUT=600
