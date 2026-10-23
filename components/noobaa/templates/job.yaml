@@ -93,7 +93,7 @@ spec:
               fi
 
               echo "StorageClass $STORAGE_CLASS not found. Installing standalone NooBaa..."
-              noobaa install --mini --namespace "$NAMESPACE"
+              noobaa-operator install --mini --namespace "$NAMESPACE"
 
               echo "Waiting for StorageClass $STORAGE_CLASS to become available..."
               TIMEOUT=300
