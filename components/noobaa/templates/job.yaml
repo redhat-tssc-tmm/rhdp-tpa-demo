@@ -96,14 +96,30 @@ spec:
               fi
 
               echo "StorageClass $STORAGE_CLASS not found. Installing standalone NooBaa..."
-              noobaa-operator install --mini --namespace "$NAMESPACE"
 
-              echo "Granting SCC to NooBaa and CNPG service accounts..."
-              kubectl adm policy add-scc-to-user nonroot-v2 -z cnpg-manager -n "$NAMESPACE" || true
-              kubectl adm policy add-scc-to-user nonroot-v2 -z noobaa -n "$NAMESPACE" || true
-              kubectl adm policy add-scc-to-user nonroot-v2 -z noobaa-endpoint -n "$NAMESPACE" || true
-              kubectl adm policy add-scc-to-user nonroot-v2 -z noobaa-core -n "$NAMESPACE" || true
-              kubectl rollout restart deployment/cnpg-controller-manager -n "$NAMESPACE" || true
+              # Run install without waiting — noobaa install blocks on system ready
+              # but CNPG needs SCC grants before it can start on OpenShift
+              noobaa-operator install --mini --namespace "$NAMESPACE" &
+              INSTALL_PID=$!
+
+              # Wait for the CNPG service accounts to be created, then grant SCC
+              echo "Waiting for CNPG and NooBaa service accounts..."
+              for i in $(seq 1 60); do
+                if kubectl get sa cnpg-manager -n "$NAMESPACE" >/dev/null 2>&1; then
+                  echo "Granting SCC to service accounts..."
+                  kubectl adm policy add-scc-to-user nonroot-v2 -z cnpg-manager -n "$NAMESPACE" || true
+                  kubectl adm policy add-scc-to-user nonroot-v2 -z noobaa -n "$NAMESPACE" || true
+                  kubectl adm policy add-scc-to-user nonroot-v2 -z noobaa-endpoint -n "$NAMESPACE" || true
+                  kubectl adm policy add-scc-to-user nonroot-v2 -z noobaa-core -n "$NAMESPACE" || true
+                  # Restart CNPG to pick up the SCC
+                  kubectl rollout restart deployment/cnpg-controller-manager -n "$NAMESPACE" || true
+                  break
+                fi
+                sleep 5
+              done
+
+              # Wait for install to finish
+              wait $INSTALL_PID || true
 
               echo "Waiting for StorageClass $STORAGE_CLASS to become available..."
               TIMEOUT=600
