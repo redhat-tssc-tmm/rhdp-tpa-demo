@@ -72,7 +72,7 @@ metadata:
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:
   backoffLimit: 1
-  activeDeadlineSeconds: 600
+  activeDeadlineSeconds: 900
   ttlSecondsAfterFinished: 600
   template:
     spec:
@@ -98,8 +98,15 @@ spec:
               echo "StorageClass $STORAGE_CLASS not found. Installing standalone NooBaa..."
               noobaa-operator install --mini --namespace "$NAMESPACE"
 
+              echo "Granting SCC to NooBaa and CNPG service accounts..."
+              kubectl adm policy add-scc-to-user nonroot-v2 -z cnpg-manager -n "$NAMESPACE" || true
+              kubectl adm policy add-scc-to-user nonroot-v2 -z noobaa -n "$NAMESPACE" || true
+              kubectl adm policy add-scc-to-user nonroot-v2 -z noobaa-endpoint -n "$NAMESPACE" || true
+              kubectl adm policy add-scc-to-user nonroot-v2 -z noobaa-core -n "$NAMESPACE" || true
+              kubectl rollout restart deployment/cnpg-controller-manager -n "$NAMESPACE" || true
+
               echo "Waiting for StorageClass $STORAGE_CLASS to become available..."
-              TIMEOUT=300
+              TIMEOUT=600
               INTERVAL=10
               ELAPSED=0
               while [ $ELAPSED -lt $TIMEOUT ]; do
