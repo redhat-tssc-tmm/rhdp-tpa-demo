@@ -139,8 +139,37 @@ spec:
               }
 
               SC_STATUS=$(kube_get "/apis/storage.k8s.io/v1/storageclasses/$STORAGE_CLASS")
-              if [ "$SC_STATUS" = "200" ]; then
-                echo "StorageClass $STORAGE_CLASS already exists. ODF or NooBaa is present."
+              BS_STATUS=$(kube_get "/apis/noobaa.io/v1alpha1/namespaces/$NAMESPACE/backingstores/noobaa-default-backing-store")
+              if [ "$SC_STATUS" = "200" ] && [ "$BS_STATUS" = "200" ]; then
+                echo "StorageClass and BackingStore already exist. ODF or NooBaa is present."
+                exit 0
+              fi
+
+              if [ "$SC_STATUS" = "200" ] && [ "$BS_STATUS" != "200" ]; then
+                echo "StorageClass exists but BackingStore is missing. Creating it..."
+                curl -s --cacert "$CACERT" \
+                  -H "Authorization: Bearer $TOKEN" \
+                  -H "Content-Type: application/json" \
+                  -X POST "${API_SERVER}/apis/noobaa.io/v1alpha1/namespaces/${NAMESPACE}/backingstores" \
+                  -d '{
+                    "apiVersion": "noobaa.io/v1alpha1",
+                    "kind": "BackingStore",
+                    "metadata": {
+                      "name": "noobaa-default-backing-store",
+                      "namespace": "'"$NAMESPACE"'",
+                      "labels": {"app": "noobaa"}
+                    },
+                    "spec": {
+                      "type": "pv-pool",
+                      "pvPool": {
+                        "numVolumes": 1,
+                        "resources": {
+                          "requests": {"storage": "50Gi"}
+                        }
+                      }
+                    }
+                  }' | head -5
+                echo "BackingStore created. Done."
                 exit 0
               fi
 
@@ -148,9 +177,27 @@ spec:
               noobaa-operator install --mini --manual-default-backingstore --namespace "$NAMESPACE"
 
               echo "Creating PVPool default backing store..."
-              noobaa-operator backingstore create pv-pool noobaa-default-backing-store \
-                --num-volumes 1 \
-                --pv-size-gb 50 \
-                --namespace "$NAMESPACE"
+              curl -s --cacert "$CACERT" \
+                -H "Authorization: Bearer $TOKEN" \
+                -H "Content-Type: application/json" \
+                -X POST "${API_SERVER}/apis/noobaa.io/v1alpha1/namespaces/${NAMESPACE}/backingstores" \
+                -d '{
+                  "apiVersion": "noobaa.io/v1alpha1",
+                  "kind": "BackingStore",
+                  "metadata": {
+                    "name": "noobaa-default-backing-store",
+                    "namespace": "'"$NAMESPACE"'",
+                    "labels": {"app": "noobaa"}
+                  },
+                  "spec": {
+                    "type": "pv-pool",
+                    "pvPool": {
+                      "numVolumes": 1,
+                      "resources": {
+                        "requests": {"storage": "50Gi"}
+                      }
+                    }
+                  }
+                }' | head -5
 
               echo "NooBaa installation complete."
