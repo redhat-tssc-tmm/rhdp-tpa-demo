@@ -127,8 +127,19 @@ spec:
 
               STORAGE_CLASS="openshift-storage.noobaa.io"
               NAMESPACE="{{ .Values.namespace }}"
+              API_SERVER="https://kubernetes.default.svc"
+              TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+              CACERT=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
 
-              if kubectl get storageclass "$STORAGE_CLASS" >/dev/null 2>&1; then
+              kube_get() {
+                curl -s -o /dev/null -w "%{http_code}" \
+                  --cacert "$CACERT" \
+                  -H "Authorization: Bearer $TOKEN" \
+                  "${API_SERVER}${1}"
+              }
+
+              SC_STATUS=$(kube_get "/apis/storage.k8s.io/v1/storageclasses/$STORAGE_CLASS")
+              if [ "$SC_STATUS" = "200" ]; then
                 echo "StorageClass $STORAGE_CLASS already exists. ODF or NooBaa is present."
                 exit 0
               fi
@@ -136,19 +147,10 @@ spec:
               echo "StorageClass $STORAGE_CLASS not found. Installing standalone NooBaa..."
               noobaa-operator install --mini --manual-default-backingstore --namespace "$NAMESPACE"
 
-              echo "Waiting for StorageClass $STORAGE_CLASS to become available..."
-              TIMEOUT=600
-              INTERVAL=10
-              ELAPSED=0
-              while [ $ELAPSED -lt $TIMEOUT ]; do
-                if kubectl get storageclass "$STORAGE_CLASS" >/dev/null 2>&1; then
-                  echo "StorageClass $STORAGE_CLASS is now available."
-                  exit 0
-                fi
-                echo "Still waiting... (${ELAPSED}s elapsed)"
-                sleep $INTERVAL
-                ELAPSED=$((ELAPSED + INTERVAL))
-              done
+              echo "Creating PVPool default backing store..."
+              noobaa-operator backingstore create pv-pool noobaa-default-backing-store \
+                --num-volumes 1 \
+                --pv-size-gb 50 \
+                --namespace "$NAMESPACE"
 
-              echo "ERROR: Timed out waiting for StorageClass $STORAGE_CLASS after ${TIMEOUT}s"
-              exit 1
+              echo "NooBaa installation complete."
