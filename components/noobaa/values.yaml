@@ -1,0 +1,2 @@
+namespace: openshift-storage
+image: noobaa/noobaa-operator:5.22.0

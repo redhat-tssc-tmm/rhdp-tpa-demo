@@ -11,6 +11,10 @@ argocd:
   project: default
 
 components:
+  noobaa:
+    enabled: true
+    image: noobaa/noobaa-operator:5.22.0
+
   prerequisites:
     enabled: true
     objectBucketClaim:

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: tpa-noobaa
+description: Conditionally installs standalone NooBaa when ODF is not present
+type: application
+version: 0.1.0
