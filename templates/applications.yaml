@@ -30,7 +30,6 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - Replace=true
 {{- end }}
 
 {{- if .Values.components.prerequisites.enabled }}
