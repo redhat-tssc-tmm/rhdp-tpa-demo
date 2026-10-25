@@ -138,10 +138,40 @@ spec:
                   "${API_SERVER}${1}"
               }
 
+              kube_patch() {
+                local path="$1"
+                local data="$2"
+                curl -s --cacert "$CACERT" \
+                  -H "Authorization: Bearer $TOKEN" \
+                  -H "Content-Type: application/merge-patch+json" \
+                  -X PATCH "${API_SERVER}${path}" \
+                  -d "$data"
+              }
+
+              patch_noobaa_resources() {
+                echo "Patching NooBaa CR with tuned resource limits..."
+                kube_patch "/apis/noobaa.io/v1alpha1/namespaces/${NAMESPACE}/noobaas/noobaa" '{
+                  "spec": {
+                    "endpoints": {
+                      "resources": {
+                        "requests": {"cpu": "{{ .Values.resources.endpoints.requests.cpu }}", "memory": "{{ .Values.resources.endpoints.requests.memory }}"},
+                        "limits":   {"cpu": "{{ .Values.resources.endpoints.limits.cpu }}",   "memory": "{{ .Values.resources.endpoints.limits.memory }}"}
+                      }
+                    },
+                    "coreResources": {
+                      "requests": {"cpu": "{{ .Values.resources.core.requests.cpu }}", "memory": "{{ .Values.resources.core.requests.memory }}"},
+                      "limits":   {"cpu": "{{ .Values.resources.core.limits.cpu }}",   "memory": "{{ .Values.resources.core.limits.memory }}"}
+                    }
+                  }
+                }' > /dev/null
+                echo "NooBaa resources patched."
+              }
+
               SC_STATUS=$(kube_get "/apis/storage.k8s.io/v1/storageclasses/$STORAGE_CLASS")
               BS_STATUS=$(kube_get "/apis/noobaa.io/v1alpha1/namespaces/$NAMESPACE/backingstores/noobaa-default-backing-store")
               if [ "$SC_STATUS" = "200" ] && [ "$BS_STATUS" = "200" ]; then
                 echo "StorageClass and BackingStore already exist. ODF or NooBaa is present."
+                patch_noobaa_resources
                 exit 0
               fi
 
@@ -169,7 +199,8 @@ spec:
                       }
                     }
                   }' | head -5
-                echo "BackingStore created. Done."
+                echo "BackingStore created."
+                patch_noobaa_resources
                 exit 0
               fi
 
@@ -200,4 +231,12 @@ spec:
                   }
                 }' | head -5
 
+              echo "Waiting for NooBaa CR to be ready before patching resources..."
+              for i in $(seq 1 30); do
+                NB_STATUS=$(kube_get "/apis/noobaa.io/v1alpha1/namespaces/${NAMESPACE}/noobaas/noobaa")
+                if [ "$NB_STATUS" = "200" ]; then break; fi
+                echo "  Attempt ${i}/30: NooBaa CR not ready, waiting 10s..."
+                sleep 10
+              done
+              patch_noobaa_resources
               echo "NooBaa installation complete."

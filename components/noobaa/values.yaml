@@ -1,2 +1,18 @@
 namespace: openshift-storage
 image: noobaa/noobaa-operator:5.22.0
+
+resources:
+  endpoints:
+    requests:
+      cpu: 250m
+      memory: 512M
+    limits:
+      cpu: "1"
+      memory: 2G
+  core:
+    requests:
+      cpu: 250m
+      memory: 1G
+    limits:
+      cpu: 500m
+      memory: 2G
